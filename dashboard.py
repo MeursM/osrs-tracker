@@ -7,6 +7,14 @@ from datetime import datetime, timedelta
 st.set_page_config(page_title="GIM Equans Analytics", layout="wide")
 st.title("🛡️ Group Ironman Equans Dashboard")
 
+# --- STATIC PLAYER COLOR MAPPING ---
+PLAYER_COLORS = {
+    "Mas120": "#1f77b4",    # Blue
+    "MrBSvenB": "#ff7f0e",  # Orange
+    "Phome1": "#2ca02c",    # Green
+    "Darallax": "#d62728"   # Red
+}
+
 # --- CATEGORY DEFINITIONS ---
 COMBAT_SKILLS = ["Attack", "Defence", "Strength", "Hitpoints", "Ranged", "Prayer", "Magic"]
 GATHERING_SKILLS = ["Mining", "Fishing", "Woodcutting", "Hunter", "Farming"]
@@ -37,7 +45,7 @@ try:
     df = load_data()
     players = sorted(df['player'].unique().tolist())
     
-    # SETUP NAVIGATION TABS
+    # NAVIGATION TABS
     tab_group, tab_individual = st.tabs(["📊 Group Comparison", "👤 Individual Focus"])
 
     # =========================================================
@@ -54,7 +62,9 @@ try:
         # 1. Timeline Chart (All Players)
         skill_df = df[df['skill'] == selected_skill]
         fig_line = px.line(
-            skill_df, x="date", y="xp", color="player", markers=True,
+            skill_df, x="date", y="xp", color="player", 
+            color_discrete_map=PLAYER_COLORS,
+            markers=True,
             title=f"All Players: {selected_skill} XP Growth",
             labels={"date": "Date", "xp": "XP", "player": "Player"}
         )
@@ -88,6 +98,7 @@ try:
             
             fig_bar_comp = px.bar(
                 merged_g, x='player', y='xp_gained', color='player',
+                color_discrete_map=PLAYER_COLORS,
                 title=f"{selected_skill} XP Gained (Last 7 Days)",
                 text_auto=',d'
             )
@@ -120,6 +131,7 @@ try:
         df_group_radar = pd.DataFrame(radar_rows)
         fig_group_radar = px.line_polar(
             df_group_radar, r='XP', theta='Category', color='Player', 
+            color_discrete_map=PLAYER_COLORS,
             line_close=True, title="Group Archetype Distribution Comparison"
         )
         st.plotly_chart(fig_group_radar, use_container_width=True)
@@ -130,6 +142,7 @@ try:
     with tab_individual:
         selected_player = st.selectbox("👤 Select Player to Analyze", players)
         player_df = df[df['player'] == selected_player]
+        player_color = PLAYER_COLORS.get(selected_player, "#1f77b4")
         
         st.header(f"Personal Analytics: {selected_player}")
         
@@ -193,18 +206,29 @@ try:
                 elif s in ARTISAN_SKILLS: cat_xp["Artisan"] += r['xp']
                 elif s in SUPPORT_SKILLS: cat_xp["Support"] += r['xp']
                 
-            fig_rad = go.Figure(data=go.Scatterpolar(r=list(cat_xp.values()), theta=list(cat_xp.keys()), fill='toself'))
+            fig_rad = go.Figure(data=go.Scatterpolar(
+                r=list(cat_xp.values()), 
+                theta=list(cat_xp.keys()), 
+                fill='toself',
+                fillcolor=f"rgba{tuple(int(player_color.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) + (0.4,)}",
+                line=dict(color=player_color)
+            ))
             st.plotly_chart(fig_rad, use_container_width=True)
 
         st.divider()
 
-        # 3. Heatmap & Quest Prerequisites
+        # 3. Activity Trend & Quest Prerequisites
         c_heat, c_syn = st.columns([2, 1])
         with c_heat:
             st.subheader("🔥 Daily Activity Heatmap")
             p_dates = player_df.groupby('date')['xp'].sum().reset_index()
             p_dates['daily_gain'] = p_dates['xp'].diff().fillna(0)
-            st.plotly_chart(px.bar(p_dates, x='date', y='daily_gain', labels={"daily_gain": "XP Earned"}), use_container_width=True)
+            fig_daily_bar = px.bar(
+                p_dates, x='date', y='daily_gain', 
+                labels={"daily_gain": "XP Earned", "date": "Date"},
+                color_discrete_sequence=[player_color]
+            )
+            st.plotly_chart(fig_daily_bar, use_container_width=True)
             
         with c_syn:
             st.subheader("⚠️ Quest Cape Warnings")
@@ -228,7 +252,12 @@ try:
             st.plotly_chart(px.pie(latest_skills, values='xp', names='skill', hole=0.4), use_container_width=True)
         with c_step:
             st.subheader("📈 Level Step-Graph")
-            st.plotly_chart(px.line(player_df[player_df['skill'] == 'Overall'], x='date', y='level', line_shape='hv'), use_container_width=True)
+            fig_step_chart = px.line(
+                player_df[player_df['skill'] == 'Overall'], 
+                x='date', y='level', line_shape='hv',
+                color_discrete_sequence=[player_color]
+            )
+            st.plotly_chart(fig_step_chart, use_container_width=True)
 
 except Exception as e:
     st.error(f"Error loading dashboard: {e}")
