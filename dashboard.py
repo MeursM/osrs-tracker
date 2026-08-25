@@ -44,6 +44,7 @@ def load_data():
 try:
     df = load_data()
     players = sorted(df['player'].unique().tolist())
+    all_dates = sorted(df['date'].unique().tolist(), reverse=True)
     
     # NAVIGATION TABS
     tab_group, tab_individual = st.tabs(["📊 Group Comparison", "👤 Individual Focus"])
@@ -74,7 +75,7 @@ try:
         
         col1, col2 = st.columns(2)
         
-        # 2. Side-by-side Leaderboard Table
+        # 2. Side-by-side Leaderboard Table for Selected Skill
         with col1:
             st.subheader(f"Current {selected_skill} Leaderboard")
             latest_date = skill_df['date'].max()
@@ -84,51 +85,59 @@ try:
             rankings.columns = ['Player', 'Level', 'Total XP']
             st.dataframe(rankings, hide_index=True, use_container_width=True)
             
-        # 3. Weekly Progress Comparison Bar Chart
+        # 3. Flexible XP Gains Comparison Bar Chart (Choose Window & Target Date)
         with col2:
-            st.subheader("7-Day XP Gains Comparison")
-            week_ago = latest_date - timedelta(days=7)
-            recent_group = skill_df[skill_df['date'] >= week_ago]
+            st.subheader("XP Gains Comparison")
+            c_win, c_date = st.columns(2)
+            with c_win:
+                gain_window = st.radio("Time Window", ["7 Days", "30 Days"], horizontal=True)
+            with c_date:
+                chosen_end_date = st.selectbox("End Date", all_dates, index=0)
+                
+            days_back = 7 if gain_window == "7 Days" else 30
+            start_target_date = chosen_end_date - timedelta(days=days_back)
             
-            oldest_g = recent_group[recent_group['date'] == recent_group['date'].min()]
-            latest_g = recent_group[recent_group['date'] == latest_date]
+            recent_group = skill_df[(skill_df['date'] >= start_target_date) & (skill_df['date'] <= chosen_end_date)]
             
-            merged_g = pd.merge(latest_g, oldest_g, on=['player', 'skill'], suffixes=('_now', '_then'))
-            merged_g['xp_gained'] = merged_g['xp_now'] - merged_g['xp_then']
-            
-            fig_bar_comp = px.bar(
-                merged_g, x='player', y='xp_gained', color='player',
-                color_discrete_map=PLAYER_COLORS,
-                title=f"{selected_skill} XP Gained (Last 7 Days)",
-                text_auto=',d'
-            )
-            st.plotly_chart(fig_bar_comp, use_container_width=True)
+            if not recent_group.empty:
+                oldest_g = recent_group[recent_group['date'] == recent_group['date'].min()]
+                latest_g = recent_group[recent_group['date'] == recent_group['date'].max()]
+                
+                merged_g = pd.merge(latest_g, oldest_g, on=['player', 'skill'], suffixes=('_now', '_then'))
+                merged_g['xp_gained'] = merged_g['xp_now'] - merged_g['xp_then']
+                
+                fig_bar_comp = px.bar(
+                    merged_g, x='player', y='xp_gained', color='player',
+                    color_discrete_map=PLAYER_COLORS,
+                    title=f"{selected_skill} XP Gained ({gain_window} up to {chosen_end_date})",
+                    text_auto=',d'
+                )
+                st.plotly_chart(fig_bar_comp, use_container_width=True)
+            else:
+                st.info("No data available for the selected timeframe.")
 
         st.divider()
         
-        # 4. Total XP Side-by-Side Bar Chart
-        st.subheader("📊 Side-by-Side Current Total XP Comparison")
-        latest_all_df = df[(df['date'] == latest_date) & (df['skill'] == 'Overall')].copy()
+        # 4. Group XP Comparison Matrix Table (Skills as rows, Players as columns)
+        st.subheader("📋 Latest Group XP Matrix (All Skills)")
+        latest_all_df = df[df['date'] == latest_date].copy()
         
-        fig_total_xp = px.bar(
-            latest_all_df,
-            x='player',
-            y='xp',
-            color='player',
-            color_discrete_map=PLAYER_COLORS,
-            text_auto=',d',
-            title="Current Total Overall XP per Group Member",
-            labels={'player': 'Player', 'xp': 'Total Overall XP'}
-        )
-        fig_total_xp.update_layout(xaxis={'categoryorder': 'total descending'})
-        st.plotly_chart(fig_total_xp, use_container_width=True)
+        # Pivot table: Rows = Skill, Columns = Player, Values = XP
+        pivot_df = latest_all_df.pivot(index='skill', columns='player', values='xp')
+        
+        # Format numbers nicely with commas
+        formatted_pivot = pivot_df.applymap(lambda x: f"{int(x):,}" if pd.notnull(x) else "0")
+        formatted_pivot.reset_index(inplace=True)
+        formatted_pivot.rename(columns={'skill': 'Skill'}, inplace=True)
+        
+        st.dataframe(formatted_pivot, hide_index=True, use_container_width=True)
 
     # =========================================================
     # TAB 2: INDIVIDUAL PLAYER FOCUS VIEW
     # =========================================================
     with tab_individual:
         selected_player = st.selectbox("👤 Select Player to Analyze", players)
-        player_df = df[player_df['player'] == selected_player] if 'player_df' in locals() else df[df['player'] == selected_player]
+        player_df = df[df['player'] == selected_player]
         player_color = PLAYER_COLORS.get(selected_player, "#1f77b4")
         
         st.header(f"Personal Analytics: {selected_player}")
@@ -187,13 +196,12 @@ try:
         
         col_time, col_filter = st.columns([1, 2])
         with col_time:
-            timeframe = st.selectbox("Select Timeframe", ["Daily", "Weekly", "Monthly"])
+            timeframe = st.selectbox("Select Timeframe Interval", ["Daily", "Weekly", "Monthly"])
         
         with col_filter:
             available_skills = sorted(player_df['skill'].unique().tolist())
             selected_skills = st.multiselect("Filter Skills to View", available_skills, default=["Overall"] if "Overall" in available_skills else available_skills[:3])
 
-        # Prepare resampled DataFrame
         p_df_evo = player_df.copy()
         p_df_evo['datetime'] = pd.to_datetime(p_df_evo['date'])
 
@@ -207,7 +215,6 @@ try:
         else:
             p_df_evo['Period'] = p_df_evo['datetime']
 
-        # Aggregate max XP per timeframe interval per skill
         resampled_df = p_df_evo.groupby(['Period', 'skill'], as_index=False)['xp'].max()
 
         fig_evo = px.line(
