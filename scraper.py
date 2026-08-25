@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 
 # Group member list extracted from your highscores page
-group_members = ["Mas120", "MrBSvenB", "Phome1", "Darallax","vagijn"]
+group_members = ["Mas120", "MrBSvenB", "Phome1", "Darallax"]
 
 # OSRS Skill List in order returned by official API
 SKILLS = [
