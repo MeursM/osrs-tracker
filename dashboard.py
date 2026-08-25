@@ -141,113 +141,179 @@ try:
     # =========================================================
     with tab_individual:
         selected_player = st.selectbox("👤 Select Player to Analyze", players)
-        player_df = df[df['player'] == selected_player]
+        player_df = df[df['player'] == selected_player].copy()
         player_color = PLAYER_COLORS.get(selected_player, "#1f77b4")
         
         st.header(f"Personal Analytics: {selected_player}")
         
-        # 1. Weekly Snapshot
-        st.subheader("🗓️ 7-Day Performance Snapshot")
-        latest_date = player_df['date'].max()
-        week_ago_date = latest_date - timedelta(days=7)
-        
-        recent_df = player_df[player_df['date'] >= week_ago_date]
-        oldest_recent = recent_df[recent_df['date'] == recent_df['date'].min()]
-        latest_recent = recent_df[recent_df['date'] == latest_date]
-        
-        merged_week = pd.merge(latest_recent, oldest_recent, on=['skill'], suffixes=('_now', '_then'))
-        merged_week['xp_gained'] = merged_week['xp_now'] - merged_week['xp_then']
-        merged_week['levels_gained'] = merged_week['level_now'] - merged_week['level_then']
-        
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Weekly XP Gain", f"{merged_week['xp_gained'].sum():,} XP")
-        m2.metric("Levels Gained", f"+{merged_week['levels_gained'].sum()}")
-        m3.metric("Active Days (Last 7 Days)", f"{recent_df['date'].nunique()} / 7 Days")
-        
-        st.divider()
+        # Inner tabs for organizing personal data
+        tab_p_overview, tab_p_evolution, tab_p_breakdown = st.tabs([
+            "📈 Overview & Targets", 
+            "📊 XP Evolution Charts", 
+            "📅 Trained Skills Breakdown"
+        ])
 
-        # 2. Time-to-Target & Next Level Predictions
-        st.subheader("🎯 Time-to-Target (EHP Remaining)")
-        latest_skills = latest_recent[latest_recent['skill'] != 'Overall']
-        
-        b70_ehp = sum([(LEVEL_XP[70] - r['xp']) / EHP_RATES.get(r['skill'], 50000) for _, r in latest_skills.iterrows() if r['xp'] < LEVEL_XP[70]])
-        b80_ehp = sum([(LEVEL_XP[80] - r['xp']) / EHP_RATES.get(r['skill'], 50000) for _, r in latest_skills.iterrows() if r['xp'] < LEVEL_XP[80]])
-        max_ehp = sum([(13034431 - r['xp']) / EHP_RATES.get(r['skill'], 50000) for _, r in latest_skills.iterrows() if r['xp'] < 13034431])
-        
-        t1, t2, t3 = st.columns(3)
-        t1.metric("Base 70s Target", f"{round(b70_ehp, 1)} hrs")
-        t2.metric("Base 80s Target", f"{round(b80_ehp, 1)} hrs")
-        t3.metric("Max Cape Target", f"{round(max_ehp, 1)} hrs")
-        
-        # Predictions
-        tot_xp_week = merged_week['xp_gained'].sum()
-        daily_rate = tot_xp_week / 7 if tot_xp_week > 0 else 1
-        predictions = []
-        for _, row in latest_skills.iterrows():
-            if row['level'] < 99:
-                needed = LEVEL_XP[row['level'] + 1] - row['xp']
-                days_left = needed / daily_rate if daily_rate > 0 else 999
-                predictions.append({
-                    "Skill": row['skill'], "Current Level": row['level'], 
-                    "Next Level": row['level'] + 1, "Est. Date": (datetime.now() + timedelta(days=days_left)).strftime("%Y-%m-%d") if days_left < 365 else "365+ Days"
-                })
-        st.dataframe(pd.DataFrame(predictions).head(5), hide_index=True, use_container_width=True)
+        # --- SUB-TAB 1: OVERVIEW & TARGETS ---
+        with tab_p_overview:
+            st.subheader("🗓️ 7-Day Performance Snapshot")
+            latest_date = player_df['date'].max()
+            week_ago_date = latest_date - timedelta(days=7)
+            
+            recent_df = player_df[player_df['date'] >= week_ago_date]
+            oldest_recent = recent_df[recent_df['date'] == recent_df['date'].min()]
+            latest_recent = recent_df[recent_df['date'] == latest_date]
+            
+            merged_week = pd.merge(latest_recent, oldest_recent, on=['skill'], suffixes=('_now', '_then'))
+            merged_week['xp_gained'] = merged_week['xp_now'] - merged_week['xp_then']
+            merged_week['levels_gained'] = merged_week['level_now'] - merged_week['level_then']
+            
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Weekly XP Gain", f"{merged_week['xp_gained'].sum():,} XP")
+            m2.metric("Levels Gained", f"+{merged_week['levels_gained'].sum()}")
+            m3.metric("Active Days (Last 7 Days)", f"{recent_df['date'].nunique()} / 7 Days")
+            
+            st.divider()
 
-        st.divider()
+            st.subheader("🎯 Time-to-Target (EHP Remaining)")
+            latest_skills = latest_recent[latest_recent['skill'] != 'Overall']
+            
+            b70_ehp = sum([(LEVEL_XP[70] - r['xp']) / EHP_RATES.get(r['skill'], 50000) for _, r in latest_skills.iterrows() if r['xp'] < LEVEL_XP[70]])
+            b80_ehp = sum([(LEVEL_XP[80] - r['xp']) / EHP_RATES.get(r['skill'], 50000) for _, r in latest_skills.iterrows() if r['xp'] < LEVEL_XP[80]])
+            max_ehp = sum([(13034431 - r['xp']) / EHP_RATES.get(r['skill'], 50000) for _, r in latest_skills.iterrows() if r['xp'] < 13034431])
+            
+            t1, t2, t3 = st.columns(3)
+            t1.metric("Base 70s Target", f"{round(b70_ehp, 1)} hrs")
+            t2.metric("Base 80s Target", f"{round(b80_ehp, 1)} hrs")
+            t3.metric("Max Cape Target", f"{round(max_ehp, 1)} hrs")
+            
+            tot_xp_week = merged_week['xp_gained'].sum()
+            daily_rate = tot_xp_week / 7 if tot_xp_week > 0 else 1
+            predictions = []
+            for _, row in latest_skills.iterrows():
+                if row['level'] < 99:
+                    needed = LEVEL_XP[row['level'] + 1] - row['xp']
+                    days_left = needed / daily_rate if daily_rate > 0 else 999
+                    predictions.append({
+                        "Skill": row['skill'], "Current Level": row['level'], 
+                        "Next Level": row['level'] + 1, "Est. Date": (datetime.now() + timedelta(days=days_left)).strftime("%Y-%m-%d") if days_left < 365 else "365+ Days"
+                    })
+            st.dataframe(pd.DataFrame(predictions).head(5), hide_index=True, use_container_width=True)
 
-        # 3. Dynamic XP Evolution Tracker (Daily, Weekly, Monthly per Skill)
-        st.subheader("📈 XP Evolution per Skill")
-        
-        col_time, col_filter = st.columns([1, 2])
-        with col_time:
-            timeframe = st.selectbox("Select Timeframe Interval", ["Daily", "Weekly", "Monthly"])
-        
-        with col_filter:
-            available_skills = sorted(player_df['skill'].unique().tolist())
-            selected_skills = st.multiselect("Filter Skills to View", available_skills, default=["Overall"] if "Overall" in available_skills else available_skills[:3])
+            st.divider()
 
-        p_df_evo = player_df.copy()
-        p_df_evo['datetime'] = pd.to_datetime(p_df_evo['date'])
+            c_don, c_step = st.columns([1, 1])
+            with c_don:
+                st.subheader("🍩 Current XP Breakdown")
+                st.plotly_chart(px.pie(latest_skills, values='xp', names='skill', hole=0.4), use_container_width=True)
+            with c_step:
+                st.subheader("📈 Level Progression (Overall)")
+                fig_step_chart = px.line(
+                    player_df[player_df['skill'] == 'Overall'], 
+                    x='date', y='level', line_shape='hv',
+                    color_discrete_sequence=[player_color]
+                )
+                st.plotly_chart(fig_step_chart, use_container_width=True)
 
-        if selected_skills:
-            p_df_evo = p_df_evo[p_df_evo['skill'].isin(selected_skills)]
+        # --- SUB-TAB 2: XP EVOLUTION CHARTS ---
+        with tab_p_evolution:
+            st.subheader("📈 XP Evolution per Skill")
+            
+            col_time, col_filter = st.columns([1, 2])
+            with col_time:
+                timeframe = st.selectbox("Select Timeframe Interval", ["Daily", "Weekly", "Monthly"])
+            
+            with col_filter:
+                available_skills = sorted(player_df['skill'].unique().tolist())
+                selected_skills = st.multiselect("Filter Skills to View", available_skills, default=["Overall"] if "Overall" in available_skills else available_skills[:3])
 
-        if timeframe == "Weekly":
-            p_df_evo['Period'] = p_df_evo['datetime'].dt.to_period('W').dt.start_time
-        elif timeframe == "Monthly":
-            p_df_evo['Period'] = p_df_evo['datetime'].dt.to_period('M').dt.start_time
-        else:
-            p_df_evo['Period'] = p_df_evo['datetime']
+            p_df_evo = player_df.copy()
+            p_df_evo['datetime'] = pd.to_datetime(p_df_evo['date'])
 
-        resampled_df = p_df_evo.groupby(['Period', 'skill'], as_index=False)['xp'].max()
+            if selected_skills:
+                p_df_evo = p_df_evo[p_df_evo['skill'].isin(selected_skills)]
 
-        fig_evo = px.line(
-            resampled_df,
-            x='Period',
-            y='xp',
-            color='skill',
-            markers=True,
-            title=f"{selected_player}'s XP Progress ({timeframe} View)",
-            labels={"Period": "Date / Period", "xp": "XP", "skill": "Skill"}
-        )
-        fig_evo.update_layout(hovermode="x unified")
-        st.plotly_chart(fig_evo, use_container_width=True)
+            if timeframe == "Weekly":
+                p_df_evo['Period'] = p_df_evo['datetime'].dt.to_period('W').dt.start_time
+            elif timeframe == "Monthly":
+                p_df_evo['Period'] = p_df_evo['datetime'].dt.to_period('M').dt.start_time
+            else:
+                p_df_evo['Period'] = p_df_evo['datetime']
 
-        st.divider()
+            resampled_df = p_df_evo.groupby(['Period', 'skill'], as_index=False)['xp'].max()
 
-        # 4. Donut & Step Growth
-        c_don, c_step = st.columns([1, 1])
-        with c_don:
-            st.subheader("🍩 Current XP Breakdown")
-            st.plotly_chart(px.pie(latest_skills, values='xp', names='skill', hole=0.4), use_container_width=True)
-        with c_step:
-            st.subheader("📈 Level Progression (Overall)")
-            fig_step_chart = px.line(
-                player_df[player_df['skill'] == 'Overall'], 
-                x='date', y='level', line_shape='hv',
-                color_discrete_sequence=[player_color]
+            fig_evo = px.line(
+                resampled_df,
+                x='Period',
+                y='xp',
+                color='skill',
+                markers=True,
+                title=f"{selected_player}'s XP Progress ({timeframe} View)",
+                labels={"Period": "Date / Period", "xp": "XP", "skill": "Skill"}
             )
-            st.plotly_chart(fig_step_chart, use_container_width=True)
+            fig_evo.update_layout(hovermode="x unified")
+            st.plotly_chart(fig_evo, use_container_width=True)
+
+        # --- SUB-TAB 3: TRAINED SKILLS BREAKDOWN TABLE ---
+        with tab_p_breakdown:
+            st.subheader("📋 Trained Skills Breakdown")
+            
+            b_col1, b_col2 = st.columns(2)
+            with b_col1:
+                breakdown_type = st.radio("Group By Period", ["Weekly", "Monthly"], horizontal=True)
+            
+            player_df['datetime'] = pd.to_datetime(player_df['date'])
+            
+            if breakdown_type == "Weekly":
+                player_df['period_str'] = player_df['datetime'].dt.to_period('W').astype(str)
+            else:
+                player_df['period_str'] = player_df['datetime'].dt.to_period('M').astype(str)
+                
+            available_periods = sorted(player_df['period_str'].unique().tolist(), reverse=True)
+            
+            with b_col2:
+                selected_period = st.selectbox("Select Time Period", available_periods)
+                
+            # Filter data for selected period
+            period_df = player_df[player_df['period_str'] == selected_period]
+            
+            if not period_df.empty:
+                min_d = period_df['date'].min()
+                max_d = period_df['date'].max()
+                
+                start_records = period_df[period_df['date'] == min_d]
+                end_records = period_df[period_df['date'] == max_d]
+                
+                merged_breakdown = pd.merge(end_records, start_records, on='skill', suffixes=('_end', '_start'))
+                merged_breakdown['xp_gained'] = merged_breakdown['xp_end'] - merged_breakdown['xp_start']
+                merged_breakdown['levels_gained'] = merged_breakdown['level_end'] - merged_breakdown['level_start']
+                
+                # Filter OUT non-trained skills (XP gained > 0) and excluding 'Overall' for the breakdown
+                trained_df = merged_breakdown[(merged_breakdown['xp_gained'] > 0) & (merged_breakdown['skill'] != 'Overall')].copy()
+                
+                if not trained_df.empty:
+                    trained_df = trained_df.sort_values(by='xp_gained', ascending=False)
+                    
+                    # Summary metrics
+                    sm1, sm2, sm3 = st.columns(3)
+                    sm1.metric("Skills Trained", f"{len(trained_df)}")
+                    sm2.metric("Total XP Gained", f"{trained_df['xp_gained'].sum():,} XP")
+                    sm3.metric("Total Levels Gained", f"+{trained_df['levels_gained'].sum()}")
+                    
+                    # Clean up table for display
+                    display_breakdown = pd.DataFrame({
+                        "Skill": trained_df['skill'],
+                        "XP Gained": trained_df['xp_gained'].apply(lambda x: f"{x:,}"),
+                        "Levels Gained": trained_df['levels_gained'].apply(lambda x: f"+{x}" if x > 0 else "0"),
+                        "Start Level": trained_df['level_start'],
+                        "End Level": trained_df['level_end'],
+                        "End Total XP": trained_df['xp_end'].apply(lambda x: f"{x:,}")
+                    })
+                    
+                    st.dataframe(display_breakdown, hide_index=True, use_container_width=True)
+                else:
+                    st.info(f"No individual skill XP gained recorded for period: {selected_period}")
+            else:
+                st.info("No data available for this timeframe.")
 
 except Exception as e:
     st.error(f"Error loading dashboard: {e}")
