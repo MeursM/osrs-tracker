@@ -12,7 +12,8 @@ PLAYER_COLORS = {
     "Mas120": "#1f77b4",    # Blue
     "MrBSvenB": "#ff7f0e",  # Orange
     "Phome1": "#2ca02c",    # Green
-    "Darallax": "#d62728"   # Red
+    "Darallax": "#d62728",   # Red
+    "Vagijn": "#7F00FF"    #violet
 }
 
 # --- CATEGORY DEFINITIONS ---
