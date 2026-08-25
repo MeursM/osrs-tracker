@@ -125,8 +125,12 @@ try:
         # Pivot table: Rows = Skill, Columns = Player, Values = XP
         pivot_df = latest_all_df.pivot(index='skill', columns='player', values='xp')
         
-        # Format numbers nicely with commas
-        formatted_pivot = pivot_df.applymap(lambda x: f"{int(x):,}" if pd.notnull(x) else "0")
+        # Pandas 2.1+ compatible formatting
+        if hasattr(pivot_df, 'map'):
+            formatted_pivot = pivot_df.map(lambda x: f"{int(x):,}" if pd.notnull(x) else "0")
+        else:
+            formatted_pivot = pivot_df.applymap(lambda x: f"{int(x):,}" if pd.notnull(x) else "0")
+
         formatted_pivot.reset_index(inplace=True)
         formatted_pivot.rename(columns={'skill': 'Skill'}, inplace=True)
         
