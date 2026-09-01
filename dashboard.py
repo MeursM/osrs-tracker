@@ -477,13 +477,16 @@ try:
             if not filtered_ach_df.empty:
                 new_completions = filtered_ach_df[filtered_ach_df['New_Value'] > filtered_ach_df['Old_Value']].copy()
                 
+                # Format max date as string to prevent st.metric type errors
+                last_updated = str(filtered_ach_df['date'].max()) if not filtered_ach_df.empty else "N/A"
+                
                 col_ach_stats = st.columns(3)
                 with col_ach_stats[0]:
                     st.metric("Total Entries Tracked", len(filtered_ach_df['Entry_Name'].unique()))
                 with col_ach_stats[1]:
                     st.metric("Recent Progress Changes", len(new_completions))
                 with col_ach_stats[2]:
-                    st.metric("Last Updated Date", filtered_ach_df['date'].max() if not filtered_ach_df.empty else "N/A")
+                    st.metric("Last Updated Date", last_updated)
                 
                 st.divider()
                 
@@ -493,9 +496,9 @@ try:
                     new_completions_display = new_completions.sort_values('timestamp', ascending=False).head(20)
                     
                     display_ach = pd.DataFrame({
-                        "Date": new_completions_display['date'],
+                        "Date": new_completions_display['date'].astype(str),
                         "Entry": new_completions_display['Entry_Name'],
-                        "Status": new_completions_display['New_Value'].apply(lambda x: "✅ Completed" if x == 2 or x == 1 else f"Progress: {x}"),
+                        "Status": new_completions_display['New_Value'].apply(lambda x: "✅ Completed" if x >= 1 else f"Progress: {x}"),
                     })
                     
                     st.dataframe(display_ach, hide_index=True, use_container_width=True)
@@ -510,7 +513,7 @@ try:
                     "Entry": latest_ach_status['Entry_Name'],
                     "Status": latest_ach_status['New_Value'].apply(lambda x: "✅" if x >= 1 else "❌"),
                     "Raw Value": latest_ach_status['New_Value'],
-                    "Last Update": latest_ach_status['date']
+                    "Last Update": latest_ach_status['date'].astype(str)
                 })
                 
                 status_display = status_display.sort_values('Entry')
