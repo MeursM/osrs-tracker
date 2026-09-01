@@ -149,8 +149,15 @@ try:
                 merged_g = pd.merge(latest_g, oldest_g, on=['player', 'skill'], suffixes=('_now', '_then'))
                 merged_g['xp_gained'] = merged_g['xp_now'] - merged_g['xp_then']
                 
+                # --- FIX: Convert categorical values or explicit type to string/int for Plotly ---
+                merged_g['player'] = merged_g['player'].astype(str)
+                merged_g['xp_gained'] = pd.to_numeric(merged_g['xp_gained'], errors='coerce').fillna(0)
+                
                 fig_bar_comp = px.bar(
-                    merged_g, x='player', y='xp_gained', color='player',
+                    merged_g, 
+                    x='player', 
+                    y='xp_gained', 
+                    color='player',
                     color_discrete_map=PLAYER_COLORS,
                     title=f"{selected_skill} XP Gained ({gain_window} up to {chosen_end_date})",
                     text_auto=',d'
