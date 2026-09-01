@@ -467,36 +467,19 @@ elif selected_tab == "Bosses & Activities":
             # 2. Sort by Most Recent Activity/Kills at top
             summary_df = summary_df.sort_values(by=['last_updated_sort', 'gain_week', 'latest_val'], ascending=[False, False, False])
             
-            # 3. Render 3-Column Card Grid (Wise Old Man Records Style)
+            # 3. Render 3-Column Card Grid
             cols = st.columns(3)
             
             for i, (_, row) in enumerate(summary_df.iterrows()):
                 col_idx = i % 3
                 with cols[col_idx]:
-                    # Helper for gain row html
                     def format_gain_row(label, gain_val, date_str):
                         if gain_val > 0:
-                            return f"""
-                                <div class="record-row">
-                                    <span class="record-timeframe">{label}</span>
-                                    <div>
-                                        <span class="record-gain-green">+{gain_val:,}</span>
-                                        <span style="font-size: 10px; color: #8b949e; margin-left: 4px;">{date_str}</span>
-                                    </div>
-                                </div>
-                            """
+                            return f'''<div class="record-row"><span class="record-timeframe">{label}</span><div><span class="record-gain-green">+{gain_val:,}</span><span style="font-size: 10px; color: #8b949e; margin-left: 4px;">{date_str}</span></div></div>'''
                         else:
-                            return f"""
-                                <div class="record-row">
-                                    <span class="record-timeframe">{label}</span>
-                                    <div>
-                                        <span class="record-muted">N/A</span>
-                                        <span style="font-size: 10px; color: #484f58; margin-left: 4px;">Not set</span>
-                                    </div>
-                                </div>
-                            """
+                            return f'''<div class="record-row"><span class="record-timeframe">{label}</span><div><span class="record-muted">N/A</span><span style="font-size: 10px; color: #484f58; margin-left: 4px;">Not set</span></div></div>'''
 
-                    card_html = f"""
+                    card_html = f'''
                         <div class="record-card">
                             <div class="record-title">
                                 ⚔️ {row['activitie']}
@@ -507,13 +490,12 @@ elif selected_tab == "Bosses & Activities":
                             {format_gain_row("Month", row['gain_month'], row['latest_date'])}
                             {format_gain_row("Year", row['gain_year'], row['latest_date'])}
                         </div>
-                    """
+                    '''
                     st.markdown(card_html, unsafe_allow_html=True)
         else:
             st.info("No recorded boss kills or activity points for this player.")
     else:
         st.info("No activity data available.")
-
 # =========================================================
 # TAB: ACHIEVEMENTS (2 SUB-TABS: RECENTLY DONE & FINISHED)
 # =========================================================
