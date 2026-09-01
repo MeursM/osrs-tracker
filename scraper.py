@@ -77,11 +77,11 @@ if all_skill_records:
     df_skills = pd.DataFrame(all_skill_records)
     print("Skills data:")
     print(df_skills.head(10))
-    df_skills.to_csv("gim_xp_log.csv", mode='a', header=not pd.io.common.file_exists("gim_xp_log.csv"), index=False)
+    df_skills.to_csv("gim_xp_log.csv", mode='a', header=not os.path.exists("gim_xp_log.csv"), index=False)
 
 # Save Bosses CSV
 if all_boss_records:
     df_bosses = pd.DataFrame(all_boss_records)
     print("\nBosses data:")
     print(df_bosses.head(10))
-    df_bosses.to_csv("boss_kills_log.csv", mode='a', header=not pd.io.common.file_exists("boss_kills_log.csv"), index=False)
+    df_bosses.to_csv("boss_kills_log.csv", mode='a', header=not os.path.exists("boss_kills_log.csv"), index=False)
