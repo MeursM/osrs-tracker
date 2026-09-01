@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 from datetime import datetime
 
-# Group member list extracted from your highscores page
+# Group member list
 group_members = ["Mas120", "MrBSvenB", "Phome1", "Darallax"]
 
 # OSRS Skill List in order returned by official API
@@ -14,43 +14,74 @@ SKILLS = [
 ]
 
 def fetch_player_data(username):
-    # Official OSRS Hiscore API endpoint (Normal/GIM use standard IM/main API)
-    url = f"https://services.runescape.com/m=hiscore_oldschool/index_lite.ws?player={username}"
+    """Fetch player data using the JSON API (includes bosses)"""
+    url = f"https://secure.runescape.com/m=hiscore_oldschool/index_lite.json?player={username}"
     headers = {'User-Agent': 'GIM-Tracker-Script'}
     
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to fetch data for {username}")
-        return None
-    
-    # Parse lines (Rank, Level, XP)
-    lines = response.text.strip().split("\n")
-    player_data = []
-    
-    for i, skill in enumerate(SKILLS):
-        if i < len(lines):
-            parts = lines[i].split(",")
-            player_data.append({
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            print(f"Failed to fetch data for {username}")
+            return None, None
+        
+        data = response.json()
+        
+        # Extract Skills
+        skills_data = data.get("skills", {})
+        player_data = []
+        
+        for skill in SKILLS:
+            if skill in skills_data:
+                skill_info = skills_data[skill]
+                player_data.append({
+                    "timestamp": datetime.now().isoformat(),
+                    "player": username,
+                    "skill": skill,
+                    "rank": skill_info.get("rank", -1),
+                    "level": skill_info.get("level", 0),
+                    "xp": skill_info.get("experience", 0)
+                })
+        
+        # Extract Bosses
+        bosses_data = data.get("bosses", {})
+        boss_data = []
+        
+        for boss_name, boss_info in bosses_data.items():
+            boss_data.append({
                 "timestamp": datetime.now().isoformat(),
                 "player": username,
-                "skill": skill,
-                "rank": int(parts[0]),
-                "level": int(parts[1]),
-                "xp": int(parts[2])
+                "boss": boss_name,
+                "rank": boss_info.get("rank", -1),
+                "kills": boss_info.get("score", 0)
             })
-            
-    return player_data
+        
+        return player_data, boss_data
+    
+    except Exception as e:
+        print(f"Error fetching data for {username}: {e}")
+        return None, None
 
 # Collect all data
-all_records = []
+all_skill_records = []
+all_boss_records = []
+
 for member in group_members:
-    data = fetch_player_data(member)
-    if data:
-        all_records.extend(data)
+    skills, bosses = fetch_player_data(member)
+    if skills:
+        all_skill_records.extend(skills)
+    if bosses:
+        all_boss_records.extend(bosses)
 
-# Convert to Pandas DataFrame for easy storage or dashboard feeding
-df = pd.DataFrame(all_records)
-print(df.head(10))
+# Save Skills CSV
+if all_skill_records:
+    df_skills = pd.DataFrame(all_skill_records)
+    print("Skills data:")
+    print(df_skills.head(10))
+    df_skills.to_csv("gim_xp_log.csv", mode='a', header=not pd.io.common.file_exists("gim_xp_log.csv"), index=False)
 
-# Save to CSV (append mode for historical tracking over time)
-df.to_csv("gim_xp_log.csv", mode='a', header=not pd.io.common.file_exists("gim_xp_log.csv"), index=False)
+# Save Bosses CSV
+if all_boss_records:
+    df_bosses = pd.DataFrame(all_boss_records)
+    print("\nBosses data:")
+    print(df_bosses.head(10))
+    df_bosses.to_csv("boss_kills_log.csv", mode='a', header=not pd.io.common.file_exists("boss_kills_log.csv"), index=False)
