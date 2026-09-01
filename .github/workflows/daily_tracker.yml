@@ -27,13 +27,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pandas
 
-      - name: Run Tracker Script
+      - name: Run XP Tracker Script
         run: python scraper.py
 
-      - name: Commit and Push Updated CSV
+      - name: Run Achievement Tracker Script
+        run: python achievement_tracker.py
+
+      - name: Commit and Push Updated CSVs
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add gim_xp_log.csv
-          git diff --quiet && git diff --staged --quiet || git commit -m "Automated update: GIM XP $(date -u +'%Y-%m-%d')"
+          git add gim_xp_log.csv boss_kills_log.csv achievements_log.csv
+          git diff --quiet && git diff --staged --quiet || git commit -m "Automated update: GIM tracking $(date -u +'%Y-%m-%d')"
           git push
