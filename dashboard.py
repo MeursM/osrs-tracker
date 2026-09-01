@@ -423,38 +423,40 @@ elif selected_tab == "Bosses & Activities":
     if act_df is not None and not act_df.empty:
         p_act = act_df[act_df['player'] == selected_player].copy()
         
-        # 1. Filter out entries with 0 total kills / unranked (-1 converted to 0)
+        # 1. Filter out entries with 0 total kills / unranked
         p_act_positive = p_act.groupby('activitie')['amount'].max()
         valid_activities = p_act_positive[p_act_positive > 0].index.tolist()
         
         p_act_filtered = p_act[p_act['activitie'].isin(valid_activities)].copy()
         
         if not p_act_filtered.empty:
-            max_act_date = p_act_filtered['date'].max()
-            
-            # Calculate gains per activity across timeframes (Day, Week, Month, Year)
             activity_summary = []
             
             for act_name, group in p_act_filtered.groupby('activitie'):
                 group = group.sort_values('timestamp')
                 latest_val = group['amount'].iloc[-1]
                 latest_date = group['date'].iloc[-1]
+                latest_date_str = latest_date.strftime('%d %b %Y') if hasattr(latest_date, 'strftime') else str(latest_date)
                 
-                # Get earliest records in time windows
-                day_ago = group[group['date'] >= (max_act_date - timedelta(days=1))]
-                week_ago = group[group['date'] >= (max_act_date - timedelta(days=7))]
-                month_ago = group[group['date'] >= (max_act_date - timedelta(days=30))]
-                year_ago = group[group['date'] >= (max_act_date - timedelta(days=365))]
-                
-                gain_day = latest_val - day_ago['amount'].iloc[0] if not day_ago.empty else 0
-                gain_week = latest_val - week_ago['amount'].iloc[0] if not week_ago.empty else 0
-                gain_month = latest_val - month_ago['amount'].iloc[0] if not month_ago.empty else 0
-                gain_year = latest_val - year_ago['amount'].iloc[0] if not year_ago.empty else 0
+                # Helper: get starting amount prior to or at window start relative to this activity's latest date
+                def get_gain(days):
+                    cutoff = latest_date - timedelta(days=days)
+                    past_records = group[group['date'] <= cutoff]
+                    if not past_records.empty:
+                        base_val = past_records['amount'].iloc[-1]
+                    else:
+                        base_val = group['amount'].iloc[0]  # Fallback to earliest recorded snapshot
+                    return latest_val - base_val
+
+                gain_day = get_gain(1)
+                gain_week = get_gain(7)
+                gain_month = get_gain(30)
+                gain_year = get_gain(365)
                 
                 activity_summary.append({
                     'activitie': act_name,
                     'latest_val': latest_val,
-                    'latest_date': latest_date,
+                    'latest_date_str': latest_date_str,
                     'gain_day': gain_day,
                     'gain_week': gain_week,
                     'gain_month': gain_month,
@@ -465,7 +467,10 @@ elif selected_tab == "Bosses & Activities":
             summary_df = pd.DataFrame(activity_summary)
             
             # 2. Sort by Most Recent Activity/Kills at top
-            summary_df = summary_df.sort_values(by=['last_updated_sort', 'gain_week', 'latest_val'], ascending=[False, False, False])
+            summary_df = summary_df.sort_values(
+                by=['last_updated_sort', 'gain_week', 'latest_val'], 
+                ascending=[False, False, False]
+            )
             
             # 3. Render 3-Column Card Grid
             cols = st.columns(3)
@@ -474,10 +479,21 @@ elif selected_tab == "Bosses & Activities":
                 col_idx = i % 3
                 with cols[col_idx]:
                     def format_gain_row(label, gain_val, date_str):
+                        # Display green highlight if there's a gain, otherwise show +0 or total
                         if gain_val > 0:
-                            return f'''<div class="record-row"><span class="record-timeframe">{label}</span><div><span class="record-gain-green">+{gain_val:,}</span><span style="font-size: 10px; color: #8b949e; margin-left: 4px;">{date_str}</span></div></div>'''
+                            val_html = f'<span class="record-gain-green">+{gain_val:,}</span>'
                         else:
-                            return f'''<div class="record-row"><span class="record-timeframe">{label}</span><div><span class="record-muted">N/A</span><span style="font-size: 10px; color: #484f58; margin-left: 4px;">Not set</span></div></div>'''
+                            val_html = f'<span style="color: #c9d1d9; font-weight: 600;">+0</span>'
+                            
+                        return f'''
+                            <div class="record-row">
+                                <span class="record-timeframe">{label}</span>
+                                <div>
+                                    {val_html}
+                                    <span style="font-size: 10px; color: #8b949e; margin-left: 6px;">{date_str}</span>
+                                </div>
+                            </div>
+                        '''
 
                     card_html = f'''
                         <div class="record-card">
@@ -485,10 +501,10 @@ elif selected_tab == "Bosses & Activities":
                                 ⚔️ {row['activitie']}
                                 <span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row['latest_val']:,}</span>
                             </div>
-                            {format_gain_row("Day", row['gain_day'], row['latest_date'])}
-                            {format_gain_row("Week", row['gain_week'], row['latest_date'])}
-                            {format_gain_row("Month", row['gain_month'], row['latest_date'])}
-                            {format_gain_row("Year", row['gain_year'], row['latest_date'])}
+                            {format_gain_row("Day", row['gain_day'], row['latest_date_str'])}
+                            {format_gain_row("Week", row['gain_week'], row['latest_date_str'])}
+                            {format_gain_row("Month", row['gain_month'], row['latest_date_str'])}
+                            {format_gain_row("Year", row['gain_year'], row['latest_date_str'])}
                         </div>
                     '''
                     st.markdown(card_html, unsafe_allow_html=True)
