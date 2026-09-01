@@ -445,7 +445,7 @@ elif selected_tab == "Bosses & Activities":
                     if not past_records.empty:
                         base_val = past_records['amount'].iloc[-1]
                     else:
-                        base_val = group['amount'].iloc[0]  # Fallback to earliest recorded snapshot
+                        base_val = group['amount'].iloc[0]
                     return latest_val - base_val
 
                 gain_day = get_gain(1)
@@ -479,34 +479,32 @@ elif selected_tab == "Bosses & Activities":
                 col_idx = i % 3
                 with cols[col_idx]:
                     def format_gain_row(label, gain_val, date_str):
-                        # Display green highlight if there's a gain, otherwise show +0 or total
                         if gain_val > 0:
                             val_html = f'<span class="record-gain-green">+{gain_val:,}</span>'
+                            date_html = f'<span style="font-size: 10px; color: #8b949e; margin-left: 6px;">{date_str}</span>'
                         else:
-                            val_html = f'<span style="color: #c9d1d9; font-weight: 600;">+0</span>'
+                            val_html = '<span class="record-muted">N/A</span>'
+                            date_html = '<span style="font-size: 10px; color: #484f58; margin-left: 6px;">Not set</span>'
                             
-                        return f'''
-                            <div class="record-row">
-                                <span class="record-timeframe">{label}</span>
-                                <div>
-                                    {val_html}
-                                    <span style="font-size: 10px; color: #8b949e; margin-left: 6px;">{date_str}</span>
-                                </div>
-                            </div>
-                        '''
+                        return f'<div class="record-row"><span class="record-timeframe">{label}</span><div>{val_html}{date_html}</div></div>'
 
-                    card_html = f'''
-                        <div class="record-card">
-                            <div class="record-title">
-                                ⚔️ {row['activitie']}
-                                <span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row['latest_val']:,}</span>
-                            </div>
-                            {format_gain_row("Day", row['gain_day'], row['latest_date_str'])}
-                            {format_gain_row("Week", row['gain_week'], row['latest_date_str'])}
-                            {format_gain_row("Month", row['gain_month'], row['latest_date_str'])}
-                            {format_gain_row("Year", row['gain_year'], row['latest_date_str'])}
-                        </div>
-                    '''
+                    day_row = format_gain_row("Day", row['gain_day'], row['latest_date_str'])
+                    week_row = format_gain_row("Week", row['gain_week'], row['latest_date_str'])
+                    month_row = format_gain_row("Month", row['gain_month'], row['latest_date_str'])
+                    year_row = format_gain_row("Year", row['gain_year'], row['latest_date_str'])
+
+                    card_html = (
+                        f'<div class="record-card">'
+                        f'<div class="record-title">⚔️ {row["activitie"]}'
+                        f'<span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row["latest_val"]:,}</span>'
+                        f'</div>'
+                        f'{day_row}'
+                        f'{week_row}'
+                        f'{month_row}'
+                        f'{year_row}'
+                        f'</div>'
+                    )
+                    
                     st.markdown(card_html, unsafe_allow_html=True)
         else:
             st.info("No recorded boss kills or activity points for this player.")
