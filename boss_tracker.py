@@ -1,0 +1,42 @@
+name: Daily OSRS GIM XP Tracker
+
+on:
+  schedule:
+    # Runs every day at 00:00 UTC (Midnight)
+    - cron: '37 0 * * *'
+  # Allows you to manually trigger the workflow from the GitHub "Actions" tab
+  workflow_dispatch:
+
+jobs:
+  track-xp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Gives GitHub Actions permission to push code updates
+
+    steps:
+      - name: Check out Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas
+
+      - name: Run XP Tracker Script
+        run: python scraper.py
+
+      - name: Run Achievement Tracker Script
+        run: python achievement_tracker.py
+
+      - name: Commit and Push Updated CSVs
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add gim_xp_log.csv boss_kills_log.csv achievements_log.csv
+          git diff --quiet && git diff --staged --quiet || git commit -m "Automated update: GIM tracking $(date -u +'%Y-%m-%d')"
+          git push
