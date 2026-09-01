@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import os
 
@@ -13,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- WOM CUSTOM DARK THEME STYLING ---
+# --- CUSTOM DARK THEME STYLING ---
 st.markdown("""
 <style>
     .stApp {
@@ -65,6 +64,46 @@ st.markdown("""
         font-weight: 600;
         color: #f0f6fc;
     }
+    
+    /* WOM Record Card Styles */
+    .record-card {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+    }
+    .record-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #f0f6fc;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .record-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed #21262d;
+        font-size: 12px;
+    }
+    .record-row:last-child {
+        border-bottom: none;
+    }
+    .record-timeframe {
+        color: #8b949e;
+    }
+    .record-gain-green {
+        color: #3fb950;
+        font-weight: 700;
+    }
+    .record-muted {
+        color: #484f58;
+    }
+    
     div[data-baseweb="select"] > div {
         background-color: #161b22 !important;
         border-color: #30363d !important;
@@ -128,7 +167,6 @@ h1, h2 = st.columns([3, 1])
 with h1:
     selected_player = st.selectbox("👤 Switch Active Player Profile", all_players, index=0)
     
-    # Calculate profile subtitle metadata
     p_df_raw = xp_df[xp_df['player'] == selected_player]
     last_snap = p_df_raw['timestamp'].max()
     time_diff = datetime.now() - last_snap if pd.notnull(last_snap) else timedelta(0)
@@ -157,9 +195,9 @@ with h2:
 
 st.write("")
 
-# --- TOP NAVIGATION TABS ---
+# --- NAVIGATION TABS ---
 nav_tabs = ["Overview", "Gained", "Bosses & Activities", "Achievements"]
-selected_tab = st.radio("Navigation", nav_tabs, index=1, horizontal=True, label_visibility="collapsed")
+selected_tab = st.radio("Navigation", nav_tabs, index=2, horizontal=True, label_visibility="collapsed")
 
 st.divider()
 
@@ -202,14 +240,12 @@ with sc4:
 st.write("")
 
 # =========================================================
-# TAB: GAINED (WOM UI LAYOUT WITH LIVE CSV DATA)
+# TAB: GAINED
 # =========================================================
 if selected_tab == "Gained":
     st.subheader("Gained")
     
-    # Filter Row
     ctrl1, ctrl2, ctrl3 = st.columns([3, 1, 1])
-    
     with ctrl1:
         timeframe = st.selectbox("Timeframe Window", ["Week", "Month", "Year", "All Time"], index=0)
     with ctrl2:
@@ -217,7 +253,6 @@ if selected_tab == "Gained":
     with ctrl3:
         pass
 
-    # Timeframe calculation
     max_date = p_df_raw['date'].max()
     if timeframe == "Week":
         start_target = max_date - timedelta(days=7)
@@ -230,11 +265,9 @@ if selected_tab == "Gained":
 
     st.caption(f"{selected_player}'s gains in the last **{timeframe.lower()}** ({start_target} to {max_date})")
 
-    # Filter player records within chosen timeframe window
     period_df = p_df_raw[(p_df_raw['date'] >= start_target) & (p_df_raw['date'] <= max_date)]
     
     if not period_df.empty:
-        # Determine starting and ending XP/levels per skill in window
         start_records = period_df.sort_values('timestamp').groupby('skill').first().reset_index()
         end_records = period_df.sort_values('timestamp').groupby('skill').last().reset_index()
         
@@ -242,22 +275,17 @@ if selected_tab == "Gained":
         merged_gains['Exp.'] = merged_gains['xp_end'] - merged_gains['xp_start']
         merged_gains['Levels'] = merged_gains['level_end'] - merged_gains['level_start']
         
-        # Calculate EHP
         merged_gains['EHP'] = merged_gains.apply(
             lambda r: round(r['Exp.'] / EHP_RATES.get(r['skill'], 100000), 2) if r['Exp.'] > 0 else 0.0, axis=1
         )
         
-        # Compute summary table dataframe
         display_skills = merged_gains[['skill', 'Exp.', 'Levels', 'EHP']].copy()
         display_skills.rename(columns={'skill': 'Skill'}, inplace=True)
         
-        # Split WOM Layout (Left Table vs Right Detail Panel)
         left_col, right_col = st.columns([4, 5])
         
         with left_col:
             st.write("**Skills Summary**")
-            
-            # Interactive Streamlit Dataframe with single row select
             selection_event = st.dataframe(
                 display_skills,
                 column_config={
@@ -279,7 +307,6 @@ if selected_tab == "Gained":
                 selected_skill = display_skills.iloc[selected_idx]['Skill']
         
         with right_col:
-            # Selected Skill Details
             skill_row = merged_gains[merged_gains['skill'] == selected_skill]
             
             if not skill_row.empty:
@@ -297,7 +324,6 @@ if selected_tab == "Gained":
             with r_head2:
                 st.selectbox("Metric Type", ["Experience", "Levels", "EHP"], label_visibility="collapsed")
             
-            # Start / End / % Box
             st.markdown(f"""
                 <div style="background-color: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 12px; margin-bottom: 16px;">
                     <div style="display: flex; justify-content: space-between;">
@@ -317,7 +343,6 @@ if selected_tab == "Gained":
                 </div>
             """, unsafe_allow_html=True)
             
-            # Cumulative Graph
             st.write("**Cumulative experience gained**")
             st.caption(f"A timeline of {selected_skill} experience over the past {timeframe.lower()}")
             
@@ -339,7 +364,6 @@ if selected_tab == "Gained":
             else:
                 st.info("No data points recorded for this skill in the period.")
             
-            # Daily Experience Gained Bar Chart
             st.write("**Daily experience gained**")
             st.caption(f"{selected_skill} experience gains bucketed by day")
             
@@ -391,34 +415,187 @@ elif selected_tab == "Overview":
         st.plotly_chart(fig_pie, use_container_width=True)
 
 # =========================================================
-# TAB: BOSSES & ACTIVITIES
+# TAB: BOSSES & ACTIVITIES (WISE OLD MAN RECORDS STYLE GRID)
 # =========================================================
 elif selected_tab == "Bosses & Activities":
-    st.subheader("⚔️ Boss Kills & Activity Logs")
+    st.subheader("⚔️ Boss Kills & Activity Records")
+    
     if act_df is not None and not act_df.empty:
-        p_act = act_df[act_df['player'] == selected_player]
-        latest_act_date = p_act['date'].max()
-        latest_act = p_act[p_act['date'] == latest_act_date]
+        p_act = act_df[act_df['player'] == selected_player].copy()
         
-        st.dataframe(
-            latest_act[['activitie', 'amount']].rename(columns={'activitie': 'Activity / Boss', 'amount': 'Count / KC'}),
-            hide_index=True,
-            use_container_width=True
-        )
+        # 1. Filter out entries with 0 total kills / unranked (-1 converted to 0)
+        p_act_positive = p_act.groupby('activitie')['amount'].max()
+        valid_activities = p_act_positive[p_act_positive > 0].index.tolist()
+        
+        p_act_filtered = p_act[p_act['activitie'].isin(valid_activities)].copy()
+        
+        if not p_act_filtered.empty:
+            max_act_date = p_act_filtered['date'].max()
+            
+            # Calculate gains per activity across timeframes (Day, Week, Month, Year)
+            activity_summary = []
+            
+            for act_name, group in p_act_filtered.groupby('activitie'):
+                group = group.sort_values('timestamp')
+                latest_val = group['amount'].iloc[-1]
+                latest_date = group['date'].iloc[-1]
+                
+                # Get earliest records in time windows
+                day_ago = group[group['date'] >= (max_act_date - timedelta(days=1))]
+                week_ago = group[group['date'] >= (max_act_date - timedelta(days=7))]
+                month_ago = group[group['date'] >= (max_act_date - timedelta(days=30))]
+                year_ago = group[group['date'] >= (max_act_date - timedelta(days=365))]
+                
+                gain_day = latest_val - day_ago['amount'].iloc[0] if not day_ago.empty else 0
+                gain_week = latest_val - week_ago['amount'].iloc[0] if not week_ago.empty else 0
+                gain_month = latest_val - month_ago['amount'].iloc[0] if not month_ago.empty else 0
+                gain_year = latest_val - year_ago['amount'].iloc[0] if not year_ago.empty else 0
+                
+                activity_summary.append({
+                    'activitie': act_name,
+                    'latest_val': latest_val,
+                    'latest_date': latest_date,
+                    'gain_day': gain_day,
+                    'gain_week': gain_week,
+                    'gain_month': gain_month,
+                    'gain_year': gain_year,
+                    'last_updated_sort': latest_date
+                })
+            
+            summary_df = pd.DataFrame(activity_summary)
+            
+            # 2. Sort by Most Recent Activity/Kills at top
+            summary_df = summary_df.sort_values(by=['last_updated_sort', 'gain_week', 'latest_val'], ascending=[False, False, False])
+            
+            # 3. Render 3-Column Card Grid (Wise Old Man Records Style)
+            cols = st.columns(3)
+            
+            for i, (_, row) in enumerate(summary_df.iterrows()):
+                col_idx = i % 3
+                with cols[col_idx]:
+                    # Helper for gain row html
+                    def format_gain_row(label, gain_val, date_str):
+                        if gain_val > 0:
+                            return f"""
+                                <div class="record-row">
+                                    <span class="record-timeframe">{label}</span>
+                                    <div>
+                                        <span class="record-gain-green">+{gain_val:,}</span>
+                                        <span style="font-size: 10px; color: #8b949e; margin-left: 4px;">{date_str}</span>
+                                    </div>
+                                </div>
+                            """
+                        else:
+                            return f"""
+                                <div class="record-row">
+                                    <span class="record-timeframe">{label}</span>
+                                    <div>
+                                        <span class="record-muted">N/A</span>
+                                        <span style="font-size: 10px; color: #484f58; margin-left: 4px;">Not set</span>
+                                    </div>
+                                </div>
+                            """
+
+                    card_html = f"""
+                        <div class="record-card">
+                            <div class="record-title">
+                                ⚔️ {row['activitie']}
+                                <span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row['latest_val']:,}</span>
+                            </div>
+                            {format_gain_row("Day", row['gain_day'], row['latest_date'])}
+                            {format_gain_row("Week", row['gain_week'], row['latest_date'])}
+                            {format_gain_row("Month", row['gain_month'], row['latest_date'])}
+                            {format_gain_row("Year", row['gain_year'], row['latest_date'])}
+                        </div>
+                    """
+                    st.markdown(card_html, unsafe_allow_html=True)
+        else:
+            st.info("No recorded boss kills or activity points for this player.")
     else:
         st.info("No activity data available.")
 
 # =========================================================
-# TAB: ACHIEVEMENTS
+# TAB: ACHIEVEMENTS (2 SUB-TABS: RECENTLY DONE & FINISHED)
 # =========================================================
 elif selected_tab == "Achievements":
-    st.subheader("🎯 Quests, Diaries & Achievements")
+    st.subheader("🎯 Quests & Achievements")
+    
     if achievements_df is not None and not achievements_df.empty:
-        p_ach = achievements_df[achievements_df['Player'] == selected_player]
-        st.dataframe(
-            p_ach[['date', 'Entry_Name', 'New_Value']].rename(columns={'date': 'Date', 'Entry_Name': 'Quest / Achievement', 'New_Value': 'Status Code'}),
-            hide_index=True,
-            use_container_width=True
-        )
+        p_ach = achievements_df[achievements_df['Player'] == selected_player].copy()
+        
+        # Sub-navigation for achievements
+        sub_tab1, sub_tab2 = st.tabs(["⚡ Recently Done", "✅ Finished / All Completed"])
+        
+        # --- SUB-TAB 1: RECENTLY DONE ---
+        with sub_tab1:
+            r_col1, r_col2 = st.columns([1, 3])
+            with r_col1:
+                ach_timeframe = st.selectbox("Timeframe Filter", ["Day", "Week", "Month"], index=1)
+            
+            max_ach_date = p_ach['date'].max()
+            if ach_timeframe == "Day":
+                ach_start_date = max_ach_date - timedelta(days=1)
+            elif ach_timeframe == "Week":
+                ach_start_date = max_ach_date - timedelta(days=7)
+            else:
+                ach_start_date = max_ach_date - timedelta(days=30)
+            
+            # Filter entries completed/progressed in timeframe window
+            recent_ach = p_ach[(p_ach['date'] >= ach_start_date) & (p_ach['New_Value'] > p_ach['Old_Value'])].copy()
+            
+            if not recent_ach.empty:
+                recent_ach_sorted = recent_ach.sort_values('timestamp', ascending=False)
+                
+                st.caption(f"Showing achievements completed between **{ach_start_date}** and **{max_ach_date}**")
+                
+                m1, m2 = st.columns(2)
+                m1.metric("Completions in Window", len(recent_ach_sorted))
+                m2.metric("Last Achievement Date", str(recent_ach_sorted['date'].max()))
+                
+                st.write("")
+                
+                display_recent = pd.DataFrame({
+                    "Date": recent_ach_sorted['date'].astype(str),
+                    "Achievement / Quest": recent_ach_sorted['Entry_Name'],
+                    "Status": recent_ach_sorted['New_Value'].apply(lambda x: "✅ Completed" if x >= 1 else f"Progress: {x}")
+                })
+                
+                st.dataframe(display_recent, hide_index=True, use_container_width=True)
+            else:
+                st.info(f"No achievements or quests completed in the last {ach_timeframe.lower()}.")
+
+        # --- SUB-TAB 2: FINISHED / ALL COMPLETED ---
+        with sub_tab2:
+            st.caption("Complete history of all finished quests, diaries, and combat achievements.")
+            
+            # Filter for completed entries (New_Value >= 1)
+            completed_ach = p_ach[p_ach['New_Value'] >= 1].sort_values('timestamp').drop_duplicates('Entry_Name', keep='last')
+            
+            if not completed_ach.empty:
+                f_col1, f_col2 = st.columns([2, 1])
+                with f_col1:
+                    search_query = st.text_input("🔍 Search Finished Entry", "", placeholder="e.g. Barrows, Dragon Slayer...")
+                with f_col2:
+                    category_filter = st.selectbox("Category", ["All", "Quest", "Diary", "Combat Achievement", "Music Track"])
+                
+                filtered_completed = completed_ach.copy()
+                
+                if search_query:
+                    filtered_completed = filtered_completed[filtered_completed['Entry_Name'].str.contains(search_query, case=False, na=False)]
+                
+                if category_filter != "All":
+                    filtered_completed = filtered_completed[filtered_completed['Entry_Name'].str.contains(category_filter, case=False, na=False)]
+                
+                st.metric("Total Finished Entries", len(filtered_completed))
+                
+                display_finished = pd.DataFrame({
+                    "Achievement / Quest": filtered_completed['Entry_Name'],
+                    "Status": "✅ Finished",
+                    "Completion Date": filtered_completed['date'].astype(str)
+                }).sort_values('Achievement / Quest')
+                
+                st.dataframe(display_finished, hide_index=True, use_container_width=True)
+            else:
+                st.info("No finished achievements recorded for this player.")
     else:
         st.info("No achievement data available.")
