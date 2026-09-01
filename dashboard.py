@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
+import os
 
 st.set_page_config(page_title="GIM Equans Analytics", layout="wide")
 st.title("🛡️ Group Ironman Equans Dashboard")
@@ -29,10 +30,13 @@ EHP_RATES = {
     "Agility": 55000, "Thieving": 150000, "Slayer": 35000, "Sailing": 80000
 }
 
-LEVEL_XP = [0, 0, 83, 174, 276, 388, 512, 650, 801, 969, 1154, 1358, 1584, 1833, 2107, 2411, 2746, 3115, 3523, 3973, 4470, 5018, 5624, 6291, 7028, 7842, 8740, 9730, 10824, 12031, 13363, 14833, 16456, 18247, 20224, 22406, 24815, 27473, 30408, 33648, 37224, 41171, 45529, 50339, 55649, 61512, 67983, 75127, 83014, 91721, 101333, 111945, 123660, 136594, 150872, 166636, 184040, 203209, 224389, 247786, 273642, 302228, 333804, 368699, 407239, 449782, 496686, 548404, 605522, 668517, 737927, 814445, 898807, 991728, 1094043, 1206735, 1331026, 1468240, 1619720, 1786912, 1971216, 2174257, 2398000, 2644563, 2916519, 3216480, 3547034, 3911361, 4312840, 4755255, 5242820, 5780362, 6372422, 7024982, 7744078, 8537750, 9412992, 10378872, 11443830, 12516410, 13034431]
+LEVEL_XP = [0, 0, 83, 174, 276, 388, 512, 650, 801, 969, 1154, 1358, 1584, 1833, 2107, 2411, 2746, 3115, 3523, 3973, 4470, 5018, 5624, 6291, 7028, 7842, 8740, 9730, 10824, 12031, 13363, 14833, 16456, 18247, 20224, 22406, 24815, 27473, 30408, 33648, 37224, 41171, 45529, 50339, 55649, 61512, 67983, 75127, 83014, 91721, 101333, 111945, 123660, 136594, 150872, 166636, 184040, 203254, 224466, 247886, 273742, 302288, 333804, 368599, 407015, 449428, 496254, 548886, 607652, 675026, 751472, 837999, 936588, 1048576, 1175659, 1321256, 1488065, 1677922, 1894393, 2139645, 2416592, 2730671, 3089470, 3500431, 3970406, 4507715, 5120921, 5821810, 6625521, 7552451, 8647828, 9921681, 11405296, 13103290, 15063236, 17328725, 19949292, 22968871, 26659591, 31199282, 36199861, 42987183, 51063428, 60263407, 71523778, 84292233, 99631662, 117997889, 139916727, 167659943, 201553896, 243330185, 294204840, 354994290, 427926930, 515211955, 620693261, 748398671, 913311385, 1121393688, 1377692594, 1696069776, 2088741856, 2567686353, 3167979496, 3884577840, 4738381338, 5852126185, 7160000000, 13034431]
 
 @st.cache_data(ttl=300)
-def load_data():
+def load_xp_data():
+    """Load XP/Skills data"""
+    if not os.path.exists("gim_xp_log.csv"):
+        return None
     df = pd.read_csv("gim_xp_log.csv")
     df['date'] = pd.to_datetime(df['timestamp']).dt.date
     df_grouped = df.groupby(['date', 'player', 'skill'], as_index=False).agg({
@@ -41,13 +45,48 @@ def load_data():
     }).sort_values(by='date')
     return df_grouped
 
+@st.cache_data(ttl=300)
+def load_boss_data():
+    """Load Boss kill data"""
+    if not os.path.exists("boss_kills_log.csv"):
+        return None
+    df = pd.read_csv("boss_kills_log.csv")
+    df['date'] = pd.to_datetime(df['timestamp']).dt.date
+    df_grouped = df.groupby(['date', 'player', 'boss'], as_index=False).agg({
+        'kills': 'max'
+    }).sort_values(by='date')
+    return df_grouped
+
+@st.cache_data(ttl=300)
+def load_achievements_data():
+    """Load Achievements/Quests data"""
+    if not os.path.exists("achievements_log.csv"):
+        return None
+    df = pd.read_csv("achievements_log.csv")
+    df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'])
+    df['date'] = df['timestamp'].dt.date
+    return df
+
 try:
-    df = load_data()
-    players = sorted(df['player'].unique().tolist())
-    all_dates = sorted(df['date'].unique().tolist(), reverse=True)
+    # Load all data
+    xp_df = load_xp_data()
+    boss_df = load_boss_data()
+    achievements_df = load_achievements_data()
+    
+    if xp_df is None:
+        st.error("❌ XP data not found. Please run the scraper first.")
+        st.stop()
+    
+    players = sorted(xp_df['player'].unique().tolist())
+    all_dates = sorted(xp_df['date'].unique().tolist(), reverse=True)
     
     # NAVIGATION TABS
-    tab_group, tab_individual = st.tabs(["📊 Group Comparison", "👤 Individual Focus"])
+    tab_group, tab_individual, tab_bosses, tab_achievements = st.tabs([
+        "📊 Group Comparison", 
+        "👤 Individual Focus",
+        "⚔️ Boss Tracking",
+        "🎯 Achievements & Quests"
+    ])
 
     # =========================================================
     # TAB 1: GROUP COMPARISON VIEW
@@ -56,12 +95,12 @@ try:
         st.header("Group Overview & Comparison")
         
         # Skill Filter
-        skills = sorted(df['skill'].unique().tolist())
+        skills = sorted(xp_df['skill'].unique().tolist())
         def_idx = skills.index("Overall") if "Overall" in skills else 0
         selected_skill = st.selectbox("Compare Specific Skill", skills, index=def_idx)
         
         # 1. Timeline Chart (All Players)
-        skill_df = df[df['skill'] == selected_skill]
+        skill_df = xp_df[xp_df['skill'] == selected_skill]
         fig_line = px.line(
             skill_df, x="date", y="xp", color="player", 
             color_discrete_map=PLAYER_COLORS,
@@ -120,7 +159,7 @@ try:
         
         # 4. Group XP Comparison Matrix Table (Skills as rows, Players as columns)
         st.subheader("📋 Latest Group XP Matrix (All Skills)")
-        latest_all_df = df[df['date'] == latest_date].copy()
+        latest_all_df = xp_df[xp_df['date'] == latest_date].copy()
         
         # Pivot table: Rows = Skill, Columns = Player, Values = XP
         pivot_df = latest_all_df.pivot(index='skill', columns='player', values='xp')
@@ -141,7 +180,7 @@ try:
     # =========================================================
     with tab_individual:
         selected_player = st.selectbox("👤 Select Player to Analyze", players)
-        player_df = df[df['player'] == selected_player].copy()
+        player_df = xp_df[xp_df['player'] == selected_player].copy()
         player_color = PLAYER_COLORS.get(selected_player, "#1f77b4")
         
         st.header(f"Personal Analytics: {selected_player}")
@@ -315,5 +354,162 @@ try:
             else:
                 st.info("No data available for this timeframe.")
 
+    # =========================================================
+    # TAB 3: BOSS TRACKING
+    # =========================================================
+    with tab_bosses:
+        st.header("⚔️ Boss Kill Tracking")
+        
+        if boss_df is None or boss_df.empty:
+            st.warning("⚠️ No boss data available yet. Boss tracker will start collecting data on the next run.")
+        else:
+            # Filter controls
+            col_boss_filter = st.columns(3)
+            
+            with col_boss_filter[0]:
+                selected_boss_player = st.selectbox("Select Player", sorted(boss_df['player'].unique()), key="boss_player")
+            
+            with col_boss_filter[1]:
+                boss_names = sorted(boss_df['boss'].unique().tolist())
+                selected_boss = st.selectbox("Select Boss", boss_names, key="boss_name")
+            
+            with col_boss_filter[2]:
+                latest_boss_date = boss_df['date'].max()
+                week_ago_boss_date = latest_boss_date - timedelta(days=7)
+                boss_window = st.radio("Time Window", ["7 Days", "30 Days", "All Time"], horizontal=True, key="boss_window")
+            
+            # Apply filters
+            filtered_boss_df = boss_df[boss_df['player'] == selected_boss_player]
+            filtered_boss_df = filtered_boss_df[filtered_boss_df['boss'] == selected_boss]
+            
+            if boss_window == "7 Days":
+                filtered_boss_df = filtered_boss_df[filtered_boss_df['date'] >= week_ago_boss_date]
+            elif boss_window == "30 Days":
+                filtered_boss_df = filtered_boss_df[filtered_boss_df['date'] >= (latest_boss_date - timedelta(days=30))]
+            
+            if not filtered_boss_df.empty:
+                col_chart, col_stats = st.columns([2, 1])
+                
+                with col_chart:
+                    st.subheader(f"{selected_boss} - {selected_boss_player}")
+                    fig_boss_line = px.line(
+                        filtered_boss_df, x="date", y="kills", 
+                        color_discrete_sequence=[PLAYER_COLORS.get(selected_boss_player, "#1f77b4")],
+                        markers=True,
+                        title=f"Kill Count Over Time",
+                        labels={"date": "Date", "kills": "Total Kills"}
+                    )
+                    fig_boss_line.update_xaxes(type='category')
+                    st.plotly_chart(fig_boss_line, use_container_width=True)
+                
+                with col_stats:
+                    latest_boss = filtered_boss_df[filtered_boss_df['date'] == filtered_boss_df['date'].max()]
+                    oldest_boss = filtered_boss_df[filtered_boss_df['date'] == filtered_boss_df['date'].min()]
+                    
+                    if not latest_boss.empty and not oldest_boss.empty:
+                        current_kills = latest_boss['kills'].values[0]
+                        kills_gained = current_kills - oldest_boss['kills'].values[0]
+                        
+                        st.metric("Current Kills", f"{int(current_kills):,}")
+                        st.metric("Kills Gained", f"+{int(kills_gained):,}")
+                        st.metric("Date Range", f"{oldest_boss['date'].values[0]} to {latest_boss['date'].values[0]}")
+                    else:
+                        st.metric("Current Kills", "N/A")
+            else:
+                st.info("No data available for this boss in the selected time window.")
+            
+            st.divider()
+            
+            # Group Boss Comparison
+            st.subheader("📊 Group Boss Comparison (Latest)")
+            latest_all_bosses = boss_df[boss_df['date'] == boss_df['date'].max()]
+            
+            if not latest_all_bosses.empty:
+                # Pivot: Rows = Boss, Columns = Player, Values = Kills
+                pivot_bosses = latest_all_bosses.pivot(index='boss', columns='player', values='kills')
+                
+                if hasattr(pivot_bosses, 'map'):
+                    formatted_bosses = pivot_bosses.map(lambda x: f"{int(x):,}" if pd.notnull(x) else "-")
+                else:
+                    formatted_bosses = pivot_bosses.applymap(lambda x: f"{int(x):,}" if pd.notnull(x) else "-")
+                
+                formatted_bosses.reset_index(inplace=True)
+                formatted_bosses.rename(columns={'boss': 'Boss'}, inplace=True)
+                
+                st.dataframe(formatted_bosses, hide_index=True, use_container_width=True)
+
+    # =========================================================
+    # TAB 4: ACHIEVEMENTS & QUESTS
+    # =========================================================
+    with tab_achievements:
+        st.header("🎯 Achievements, Quests & Diaries")
+        
+        if achievements_df is None or achievements_df.empty:
+            st.warning("⚠️ No achievement data available yet. Achievement tracker will start collecting data on the next run.")
+        else:
+            # Filter controls
+            col_ach_filter = st.columns(2)
+            
+            with col_ach_filter[0]:
+                selected_ach_player = st.selectbox("Select Player", sorted(achievements_df['Player'].unique()), key="ach_player")
+            
+            with col_ach_filter[1]:
+                ach_type = st.selectbox(
+                    "Filter by Type",
+                    ["All", "Quest", "Diary", "Combat Achievement", "Music Track"],
+                    key="ach_type"
+                )
+            
+            # Filter data
+            filtered_ach_df = achievements_df[achievements_df['Player'] == selected_ach_player].copy()
+            
+            if ach_type != "All":
+                filtered_ach_df = filtered_ach_df[filtered_ach_df['Entry_Name'].str.contains(ach_type, case=False, na=False)]
+            
+            if not filtered_ach_df.empty:
+                # New Completions (where Old_Value < New_Value)
+                new_completions = filtered_ach_df[filtered_ach_df['New_Value'] > filtered_ach_df['Old_Value']].copy()
+                
+                col_ach_stats = st.columns(3)
+                with col_ach_stats[0]:
+                    st.metric("Total Entries", len(filtered_ach_df['Entry_Name'].unique()))
+                with col_ach_stats[1]:
+                    st.metric("Recent Changes", len(new_completions))
+                with col_ach_stats[2]:
+                    st.metric("Last Updated", filtered_ach_df['date'].max() if not filtered_ach_df.empty else "N/A")
+                
+                st.divider()
+                
+                # Recent Completions Table
+                if not new_completions.empty:
+                    st.subheader("✨ Recent Completions")
+                    new_completions_display = new_completions.sort_values('timestamp', ascending=False).head(20)
+                    
+                    display_ach = pd.DataFrame({
+                        "Date": new_completions_display['date'],
+                        "Entry": new_completions_display['Entry_Name'],
+                        "Status": new_completions_display['New_Value'].apply(lambda x: "✅ Completed" if x == 1 else f"Progress: {x}"),
+                    })
+                    
+                    st.dataframe(display_ach, hide_index=True, use_container_width=True)
+                
+                st.divider()
+                
+                # All Entries Status Table
+                st.subheader("📋 All Entries Status")
+                latest_ach_status = filtered_ach_df.sort_values('timestamp').drop_duplicates('Entry_Name', keep='last')
+                
+                status_display = pd.DataFrame({
+                    "Entry": latest_ach_status['Entry_Name'],
+                    "Status": latest_ach_status['New_Value'].apply(lambda x: "✅" if x == 1 else f"({x})"),
+                    "Last Update": latest_ach_status['date']
+                })
+                
+                status_display = status_display.sort_values('Entry')
+                st.dataframe(status_display, hide_index=True, use_container_width=True)
+            else:
+                st.info("No achievement data available for this player/filter combination.")
+
 except Exception as e:
     st.error(f"Error loading dashboard: {e}")
+    st.write(f"Details: {str(e)}")
