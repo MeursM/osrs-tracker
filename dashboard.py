@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
+import sqlite3
 import os
 
 # --- PAGE SETUP ---
@@ -113,6 +114,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- CONSTANTS ---
+DB_FILE = "gim_tracker.db"
+
 LEVEL_XP = [0, 0, 83, 174, 276, 388, 512, 650, 801, 969, 1154, 1358, 1584, 1833, 2107, 2411, 2746, 3115, 3523, 3973, 4470, 5018, 5624, 6291, 7028, 7842, 8740, 9730, 10824, 12031, 13363, 14833, 16456, 18247, 20224, 22406, 24815, 27473, 30408, 33648, 37224, 41171, 45529, 50339, 55649, 61512, 67983, 75127, 83014, 91721, 101333, 111945, 123660, 136594, 150872, 166636, 184040, 203254, 224466, 247886, 273742, 302288, 333804, 368599, 407015, 449428, 496254, 548886, 607652, 675026, 751472, 837999, 936588, 1048576, 1175659, 1321256, 1488065, 1677922, 1894393, 2139645, 2416592, 2730671, 3089470, 3500431, 3970406, 4507715, 5120921, 5821810, 6625521, 7552451, 8647828, 9921681, 11405296, 13103290, 15063236, 17328725, 19949292, 22968871, 26659591, 31199282, 36199861, 42987183, 51063428, 60263407, 71523778, 84292233, 99631662, 117997889, 139916727, 167659943, 201553896, 243330185, 294204840, 354994290, 427926930, 515211955, 620693261, 748398671, 913311385, 1121393688, 1377692594, 1696069776, 2088741856, 2567686353, 3167979496, 3884577840, 4738381338, 5852126185, 7160000000, 13034431]
 
 EHP_RATES = {
@@ -122,32 +125,75 @@ EHP_RATES = {
     "Agility": 55000, "Thieving": 150000, "Slayer": 35000, "Sailing": 80000
 }
 
-# --- DATA LOADERS ---
+# --- SQLITE DATA LOADERS ---
+def get_connection():
+    return sqlite3.connect(DB_FILE)
+
 @st.cache_data(ttl=300)
 def load_xp_data():
-    if not os.path.exists("gim_xp_log.csv"):
+    if not os.path.exists(DB_FILE):
         return None
-    df = pd.read_csv("gim_xp_log.csv")
+    conn = get_connection()
+    df = pd.read_sql_query("SELECT * FROM skills_log", conn)
+    conn.close()
+    if df.empty:
+        return None
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['date'] = df['timestamp'].dt.date
     return df
 
 @st.cache_data(ttl=300)
 def load_activities_data():
-    if not os.path.exists("gim_activities_log.csv"):
+    if not os.path.exists(DB_FILE):
         return None
-    df = pd.read_csv("gim_activities_log.csv")
+    conn = get_connection()
+    try:
+        df = pd.read_sql_query("SELECT * FROM activities_log", conn)
+    except Exception:
+        conn.close()
+        return None
+    conn.close()
+    if df.empty:
+        return None
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['date'] = df['timestamp'].dt.date
+    
+    # Map DB column name 'activity' to 'activitie' to remain compatible with UI logic
+    if 'activity' in df.columns:
+        df.rename(columns={'activity': 'activitie'}, inplace=True)
+        
     df['amount'] = df['amount'].apply(lambda x: 0 if x < 0 else x)
     return df
 
 @st.cache_data(ttl=300)
 def load_achievements_data():
-    if not os.path.exists("achievements_log.csv"):
+    if not os.path.exists(DB_FILE):
         return None
-    df = pd.read_csv("achievements_log.csv")
-    df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'])
+    conn = get_connection()
+    try:
+        df = pd.read_sql_query("SELECT * FROM achievements_log", conn)
+    except Exception:
+        conn.close()
+        return None
+    conn.close()
+    if df.empty:
+        return None
+    
+    # Standardize column naming from DB to expected UI names
+    column_mapping = {
+        'player': 'Player',
+        'entry_name': 'Entry_Name',
+        'old_value': 'Old_Value',
+        'new_value': 'New_Value',
+        'detected_timestamp': 'Detected_Timestamp'
+    }
+    df.rename(columns=column_mapping, inplace=True)
+    
+    if 'Detected_Timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'])
+    elif 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
     df['date'] = df['timestamp'].dt.date
     return df
 
@@ -156,7 +202,7 @@ act_df = load_activities_data()
 achievements_df = load_achievements_data()
 
 if xp_df is None:
-    st.error("❌ XP data (gim_xp_log.csv) not found in directory.")
+    st.error(f"❌ Database file ({DB_FILE}) or XP table not found/empty.")
     st.stop()
 
 all_players = sorted(xp_df['player'].unique().tolist())
@@ -510,6 +556,7 @@ elif selected_tab == "Bosses & Activities":
             st.info("No recorded boss kills or activity points for this player.")
     else:
         st.info("No activity data available.")
+
 # =========================================================
 # TAB: ACHIEVEMENTS (2 SUB-TABS: RECENTLY DONE & FINISHED)
 # =========================================================
