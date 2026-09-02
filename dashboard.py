@@ -172,18 +172,15 @@ def load_achievements_data():
         return None
     conn = get_connection()
     
-    # Try loading historical achievements log first
     try:
         df = pd.read_sql_query("SELECT * FROM achievements_log", conn)
     except Exception:
         df = pd.DataFrame()
         
-    # If achievements_log is empty or missing, fallback to player_current_state
     if df.empty:
         try:
             df_state = pd.read_sql_query("SELECT * FROM player_current_state", conn)
             if not df_state.empty:
-                # Map player_current_state columns to standardized format
                 df = df_state.rename(columns={
                     'player': 'Player',
                     'entry_name': 'Entry_Name',
@@ -211,10 +208,14 @@ def load_achievements_data():
     }
     df.rename(columns=column_mapping, inplace=True)
     
+    # Fill missing old values with 0
+    df['Old_Value'] = pd.to_numeric(df.get('Old_Value', 0), errors='coerce').fillna(0)
+    df['New_Value'] = pd.to_numeric(df['New_Value'], errors='coerce').fillna(0)
+    
     if 'Detected_Timestamp' in df.columns:
-        df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'])
+        df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'], errors='coerce')
     elif 'timestamp' in df.columns:
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
     else:
         df['timestamp'] = pd.Timestamp.now()
         
@@ -582,7 +583,7 @@ elif selected_tab == "Bosses & Activities":
         st.info("No activity data available.")
 
 # =========================================================
-# TAB: ACHIEVEMENTS (2 SUB-TABS: RECENTLY DONE & FINISHED)
+# TAB: ACHIEVEMENTS
 # =========================================================
 elif selected_tab == "Achievements":
     st.subheader("🎯 Quests & Achievements")
@@ -593,16 +594,17 @@ elif selected_tab == "Achievements":
         if p_ach.empty:
             st.info(f"No achievement records found for player: {selected_player}")
         else:
-            # Sub-navigation for achievements
             sub_tab1, sub_tab2 = st.tabs(["⚡ Recently Done", "✅ Finished / All Completed"])
             
             # --- SUB-TAB 1: RECENTLY DONE ---
             with sub_tab1:
-                r_col1, r_col2 = st.columns([1, 3])
+                r_col1, _ = st.columns([1, 3])
                 with r_col1:
-                    ach_timeframe = st.selectbox("Timeframe Filter", ["Day", "Week", "Month", "All Time"], index=1)
+                    ach_timeframe = st.selectbox("Timeframe Filter", ["Day", "Week", "Month", "All Time"], index=3)
                 
-                max_ach_date = p_ach['date'].max()
+                valid_dates = p_ach['date'].dropna()
+                max_ach_date = valid_dates.max() if not valid_dates.empty else datetime.now().date()
+                
                 if ach_timeframe == "Day":
                     ach_start_date = max_ach_date - timedelta(days=1)
                 elif ach_timeframe == "Week":
@@ -610,10 +612,14 @@ elif selected_tab == "Achievements":
                 elif ach_timeframe == "Month":
                     ach_start_date = max_ach_date - timedelta(days=30)
                 else:
-                    ach_start_date = p_ach['date'].min()
+                    ach_start_date = valid_dates.min() if not valid_dates.empty else max_ach_date
                 
-                # Filter entries completed/progressed in timeframe window
-                recent_ach = p_ach[(p_ach['date'] >= ach_start_date) & (p_ach['New_Value'] > p_ach['Old_Value'])].copy()
+                # Check for completions (New_Value >= 1) within the date range
+                recent_ach = p_ach[
+                    (p_ach['date'] >= ach_start_date) & 
+                    (p_ach['date'] <= max_ach_date) & 
+                    (p_ach['New_Value'] >= 1)
+                ].copy()
                 
                 if not recent_ach.empty:
                     recent_ach_sorted = recent_ach.sort_values('timestamp', ascending=False)
@@ -627,26 +633,25 @@ elif selected_tab == "Achievements":
                     st.write("")
                     
                     display_recent = pd.DataFrame({
-                        "Date": recent_ach_sorted['date'].astype(str),
+                        "Completion Date": recent_ach_sorted['timestamp'].dt.strftime('%Y-%m-%d %H:%M'),
                         "Achievement / Quest": recent_ach_sorted['Entry_Name'],
                         "Status": recent_ach_sorted['New_Value'].apply(lambda x: "✅ Completed" if x >= 1 else f"Progress: {x}")
                     })
                     
                     st.dataframe(display_recent, hide_index=True, use_container_width=True)
                 else:
-                    st.info(f"No achievements or quests completed in the last {ach_timeframe.lower()}.")
+                    st.info(f"No achievements or quests completed in the selected timeframe ({ach_timeframe.lower()}).")
 
             # --- SUB-TAB 2: FINISHED / ALL COMPLETED ---
             with sub_tab2:
                 st.caption("Complete history of all finished quests, diaries, and combat achievements.")
                 
-                # Filter for completed entries (New_Value >= 1)
                 completed_ach = p_ach[p_ach['New_Value'] >= 1].sort_values('timestamp').drop_duplicates('Entry_Name', keep='last')
                 
                 if not completed_ach.empty:
                     f_col1, f_col2 = st.columns([2, 1])
                     with f_col1:
-                        search_query = st.text_input("🔍 Search Finished Entry", "", placeholder="e.g. Barrows, Dragon Slayer...")
+                        search_query = st.text_input("🔍 Search Finished Entry", "", placeholder="e.g. Demon Slayer, Death to the Dorgeshuun...")
                     with f_col2:
                         category_filter = st.selectbox("Category", ["All", "Quest", "Diary", "Combat Achievement", "Music Track"])
                     
@@ -663,8 +668,8 @@ elif selected_tab == "Achievements":
                     display_finished = pd.DataFrame({
                         "Achievement / Quest": filtered_completed['Entry_Name'],
                         "Status": "✅ Finished",
-                        "Completion Date": filtered_completed['date'].astype(str)
-                    }).sort_values('Achievement / Quest')
+                        "Completion Date": filtered_completed['timestamp'].dt.strftime('%Y-%m-%d %H:%M')
+                    }).sort_values('Completion Date', ascending=False)
                     
                     st.dataframe(display_finished, hide_index=True, use_container_width=True)
                 else:
