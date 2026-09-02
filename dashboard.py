@@ -589,25 +589,30 @@ elif selected_tab == "Bosses & Activities":
 elif selected_tab == "Achievements":
     st.subheader("🎯 Quests & Achievements")
 
-    # Initialize active filter state
+    # 1. Initialize session state
     if 'ach_filter' not in st.session_state:
         st.session_state.ach_filter = "Day"
 
+    # 2. Update state FIRST via button callbacks or direct check
+    # Setting the state BEFORE rendering guarantees the UI updates on the first click
     st.write("**Filter Completion Period:**")
     col_day, col_week, col_month, col_year, _ = st.columns([1, 1, 1, 1, 2])
 
-    # Buttons rendered before data verification
     if col_day.button("Day", use_container_width=True, type="primary" if st.session_state.ach_filter == "Day" else "secondary"):
         st.session_state.ach_filter = "Day"
-    
+        st.rerun()
+
     if col_week.button("Week", use_container_width=True, type="primary" if st.session_state.ach_filter == "Week" else "secondary"):
         st.session_state.ach_filter = "Week"
-        
+        st.rerun()
+
     if col_month.button("Month", use_container_width=True, type="primary" if st.session_state.ach_filter == "Month" else "secondary"):
         st.session_state.ach_filter = "Month"
-        
+        st.rerun()
+
     if col_year.button("Year", use_container_width=True, type="primary" if st.session_state.ach_filter == "Year" else "secondary"):
         st.session_state.ach_filter = "Year"
+        st.rerun()
 
     st.divider()
 
