@@ -158,11 +158,11 @@ def load_activities_data():
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['date'] = df['timestamp'].dt.date
     
-    # Map DB column name 'activity' to 'activitie' to remain compatible with UI logic
+    # Map DB column name 'activity' to 'activity' to remain compatible with UI logic
     if 'activity' in df.columns:
-        df.rename(columns={'activity': 'activitie'}, inplace=True)
+        df.rename(columns={'activity': 'activity'}, inplace=True)
         
-    df['amount'] = df['amount'].apply(lambda x: 0 if x < 0 else x)
+    df['score'] = df['score'].apply(lambda x: 0 if x < 0 else x)
     return df
 
 # --- SQLITE DATA LOADERS ---
@@ -494,28 +494,28 @@ elif selected_tab == "Bosses & Activities":
         p_act = act_df[act_df['player'] == selected_player].copy()
         
         # 1. Filter out entries with 0 total kills / unranked
-        p_act_positive = p_act.groupby('activitie')['amount'].max()
+        p_act_positive = p_act.groupby('activity')['score'].max()
         valid_activities = p_act_positive[p_act_positive > 0].index.tolist()
         
-        p_act_filtered = p_act[p_act['activitie'].isin(valid_activities)].copy()
+        p_act_filtered = p_act[p_act['activity'].isin(valid_activities)].copy()
         
         if not p_act_filtered.empty:
             activity_summary = []
             
-            for act_name, group in p_act_filtered.groupby('activitie'):
+            for act_name, group in p_act_filtered.groupby('activity'):
                 group = group.sort_values('timestamp')
-                latest_val = group['amount'].iloc[-1]
+                latest_val = group['score'].iloc[-1]
                 latest_date = group['date'].iloc[-1]
                 latest_date_str = latest_date.strftime('%d %b %Y') if hasattr(latest_date, 'strftime') else str(latest_date)
                 
-                # Helper: get starting amount prior to or at window start relative to this activity's latest date
+                # Helper: get starting score prior to or at window start relative to this activity's latest date
                 def get_gain(days):
                     cutoff = latest_date - timedelta(days=days)
                     past_records = group[group['date'] <= cutoff]
                     if not past_records.empty:
-                        base_val = past_records['amount'].iloc[-1]
+                        base_val = past_records['score'].iloc[-1]
                     else:
-                        base_val = group['amount'].iloc[0]
+                        base_val = group['score'].iloc[0]
                     return latest_val - base_val
 
                 gain_day = get_gain(1)
@@ -524,7 +524,7 @@ elif selected_tab == "Bosses & Activities":
                 gain_year = get_gain(365)
                 
                 activity_summary.append({
-                    'activitie': act_name,
+                    'activity': act_name,
                     'latest_val': latest_val,
                     'latest_date_str': latest_date_str,
                     'gain_day': gain_day,
@@ -565,7 +565,7 @@ elif selected_tab == "Bosses & Activities":
 
                     card_html = (
                         f'<div class="record-card">'
-                        f'<div class="record-title">⚔️ {row["activitie"]}'
+                        f'<div class="record-title">⚔️ {row["activity"]}'
                         f'<span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row["latest_val"]:,}</span>'
                         f'</div>'
                         f'{day_row}'
