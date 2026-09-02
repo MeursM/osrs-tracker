@@ -169,14 +169,18 @@ def load_activities_data():
 @st.cache_data(ttl=300)
 def load_achievements_data():
     if not os.path.exists(DB_FILE):
-        return None
-    conn = get_connection()
+        return pd.DataFrame()
     
+    conn = get_connection()
+    df = pd.DataFrame()
+    
+    # Try reading from achievements_log first
     try:
         df = pd.read_sql_query("SELECT * FROM achievements_log", conn)
     except Exception:
-        df = pd.DataFrame()
+        pass
         
+    # Fallback to player_current_state if achievements_log is missing or empty
     if df.empty:
         try:
             df_state = pd.read_sql_query("SELECT * FROM player_current_state", conn)
@@ -184,42 +188,35 @@ def load_achievements_data():
                 df = df_state.rename(columns={
                     'player': 'Player',
                     'entry_name': 'Entry_Name',
-                    'status_value': 'New_Value'
+                    'status_value': 'New_Value',
+                    'last_updated': 'Detected_Timestamp'
                 })
                 df['Old_Value'] = 0
-                df['timestamp'] = pd.Timestamp.now()
-                df['date'] = df['timestamp'].dt.date
-                conn.close()
-                return df
         except Exception:
             pass
-            
+
     conn.close()
+    
     if df.empty:
-        return None
+        return pd.DataFrame()
+        
+    # Normalize column names to title case
+    cols = {col: col.title() for col in df.columns}
+    df.rename(columns=cols, inplace=True)
     
-    # Standardize column naming from achievements_log
-    column_mapping = {
-        'player': 'Player',
-        'entry_name': 'Entry_Name',
-        'old_value': 'Old_Value',
-        'new_value': 'New_Value',
-        'detected_timestamp': 'Detected_Timestamp'
-    }
-    df.rename(columns=column_mapping, inplace=True)
-    
-    # Fill missing old values with 0
-    df['Old_Value'] = pd.to_numeric(df.get('Old_Value', 0), errors='coerce').fillna(0)
-    df['New_Value'] = pd.to_numeric(df['New_Value'], errors='coerce').fillna(0)
-    
-    if 'Detected_Timestamp' in df.columns:
-        df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'], errors='coerce')
-    elif 'timestamp' in df.columns:
-        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+    # Handle timestamp variations
+    time_col = None
+    for possible in ['Detected_Timestamp', 'Timestamp', 'Detected_time', 'Date']:
+        if possible in df.columns:
+            time_col = possible
+            break
+            
+    if time_col:
+        df['timestamp'] = pd.to_datetime(df[time_col], errors='coerce')
     else:
         df['timestamp'] = pd.Timestamp.now()
         
-    df['date'] = df['timestamp'].dt.date
+    df['New_Value'] = pd.to_numeric(df.get('New_Value', 1), errors='coerce').fillna(1)
     return df
 
 xp_df = load_xp_data()
@@ -588,87 +585,70 @@ elif selected_tab == "Bosses & Activities":
 elif selected_tab == "Achievements":
     st.subheader("🎯 Quests & Achievements")
 
+    # Initialize active filter state
+    if 'ach_filter' not in st.session_state:
+        st.session_state.ach_filter = "Day"
+
+    st.write("**Filter Completion Period:**")
+    col_day, col_week, col_month, col_year, _ = st.columns([1, 1, 1, 1, 2])
+
+    # Buttons rendered before data verification
+    if col_day.button("Day", use_container_width=True, type="primary" if st.session_state.ach_filter == "Day" else "secondary"):
+        st.session_state.ach_filter = "Day"
+    
+    if col_week.button("Week", use_container_width=True, type="primary" if st.session_state.ach_filter == "Week" else "secondary"):
+        st.session_state.ach_filter = "Week"
+        
+    if col_month.button("Month", use_container_width=True, type="primary" if st.session_state.ach_filter == "Month" else "secondary"):
+        st.session_state.ach_filter = "Month"
+        
+    if col_year.button("Year", use_container_width=True, type="primary" if st.session_state.ach_filter == "Year" else "secondary"):
+        st.session_state.ach_filter = "Year"
+
+    st.divider()
+
+    # Data verification and processing
     if achievements_df is not None and not achievements_df.empty:
-        # Filter for selected player and completed entries (New_Value >= 1)
+        # Filter by selected player
         p_ach = achievements_df[
             (achievements_df['Player'] == selected_player) & 
             (achievements_df['New_Value'] >= 1)
         ].copy()
 
         if p_ach.empty:
-            st.info(f"No achievement records found for player: {selected_player}")
+            st.info(f"No completed achievement records found for player: {selected_player}")
         else:
-            # Ensure timestamp is datetime type
-            p_ach['timestamp'] = pd.to_datetime(p_ach['timestamp'], errors='coerce')
-
-            # Initialize active filter state in Streamlit session_state
-            if 'ach_filter' not in st.session_state:
-                st.session_state.ach_filter = "Day"
-
-            st.write("**Filter Completion Period:**")
-            col_day, col_week, col_month, col_year, _ = st.columns([1, 1, 1, 1, 2])
-
-            # 4 Interactive Filter Buttons
-            if col_day.button("Day", use_container_width=True, type="primary" if st.session_state.ach_filter == "Day" else "secondary"):
-                st.session_state.ach_filter = "Day"
-            
-            if col_week.button("Week", use_container_width=True, type="primary" if st.session_state.ach_filter == "Week" else "secondary"):
-                st.session_state.ach_filter = "Week"
-                
-            if col_month.button("Month", use_container_width=True, type="primary" if st.session_state.ach_filter == "Month" else "secondary"):
-                st.session_state.ach_filter = "Month"
-                
-            if col_year.button("Year", use_container_width=True, type="primary" if st.session_state.ach_filter == "Year" else "secondary"):
-                st.session_state.ach_filter = "Year"
-
-            # Calculate start boundary based on current time and selected filter button
             now = pd.Timestamp.now()
             selected_filter = st.session_state.ach_filter
 
             if selected_filter == "Day":
-                # Start of today (00:00:00)
                 start_boundary = now.floor('D')
                 period_label = "today"
             elif selected_filter == "Week":
-                # 7 days ago from right now
                 start_boundary = now - pd.Timedelta(days=7)
                 period_label = "in the last 7 days"
             elif selected_filter == "Month":
-                # Start of the current month
                 start_boundary = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
                 period_label = "this month"
             elif selected_filter == "Year":
-                # Start of the current year
                 start_boundary = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
                 period_label = "this year"
 
-            # Filter dataset based on completion boundary
             filtered_ach = p_ach[p_ach['timestamp'] >= start_boundary].copy()
 
-            st.divider()
-
             if not filtered_ach.empty:
-                # Sort newest completions first
                 filtered_ach = filtered_ach.sort_values('timestamp', ascending=False)
 
-                st.metric(
-                    label=f"Completed {period_label.capitalize()}", 
-                    value=len(filtered_ach)
-                )
+                st.metric(label=f"Completed {period_label.capitalize()}", value=len(filtered_ach))
 
-                # Format results table for display
                 display_df = pd.DataFrame({
                     "Achievement / Quest": filtered_ach['Entry_Name'],
                     "Completion Date": filtered_ach['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S'),
                     "Status": "✅ Completed"
                 })
 
-                st.dataframe(
-                    display_df, 
-                    hide_index=True, 
-                    use_container_width=True
-                )
+                st.dataframe(display_df, hide_index=True, use_container_width=True)
             else:
                 st.info(f"No achievements or quests completed {period_label}.")
     else:
-        st.info("No achievement data available.")
+        st.info("No achievement data available in the database.")
