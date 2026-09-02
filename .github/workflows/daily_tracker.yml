@@ -1,17 +1,17 @@
-name: Daily OSRS GIM XP Tracker
+name: Daily OSRS GIM Tracker
 
 on:
   schedule:
-    # Runs every day at 00:00 UTC (Midnight)
+    # Runs every day at 00:37 UTC
     - cron: '37 0 * * *'
-  # Allows you to manually trigger the workflow from the GitHub "Actions" tab
+  # Allows manual triggers from the GitHub Actions tab
   workflow_dispatch:
 
 jobs:
-  track-xp:
+  track-gim:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Gives GitHub Actions permission to push code updates
+      contents: write  # Gives permission to push updates back to the repo
 
     steps:
       - name: Check out Repository
@@ -33,10 +33,9 @@ jobs:
       - name: Run Achievement Tracker Script
         run: python achievement_tracker.py
 
-      - name: Commit and Push Updated CSVs
+      - name: Commit and Push Updated SQLite Databases
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add gim_xp_log.csv gim_activities_log.csv achievements_log.csv
-          git diff --quiet && git diff --staged --quiet || git commit -m "Automated update: GIM tracking $(date -u +'%Y-%m-%d')"
-          git push
+          git add gim_tracker.db gim_achievements.db
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automated update: GIM tracking $(date -u +'%Y-%m-%d')" && git push)
