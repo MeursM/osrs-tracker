@@ -133,6 +133,8 @@ def get_connection():
 def get_connection_A():
     return sqlite3.connect(DB_FILE_A)
     
+# --- SQLITE DATA LOADERS (WITH TIMESHIFT FIX) ---
+
 @st.cache_data(ttl=300)
 def load_xp_data():
     if not os.path.exists(DB_FILE):
@@ -142,9 +144,12 @@ def load_xp_data():
     conn.close()
     if df.empty:
         return None
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    
+    # FIX: Parse timestamp and subtract 5 hours so 5 AM snapshots map to the previous day
+    df['timestamp'] = pd.to_datetime(df['timestamp']) - pd.Timedelta(hours=5)
     df['date'] = df['timestamp'].dt.date
     return df
+
 
 @st.cache_data(ttl=300)
 def load_activities_data():
@@ -159,17 +164,18 @@ def load_activities_data():
     conn.close()
     if df.empty:
         return None
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+    # FIX: Subtract 5 hours to assign 5 AM data to the correct day
+    df['timestamp'] = pd.to_datetime(df['timestamp']) - pd.Timedelta(hours=5)
     df['date'] = df['timestamp'].dt.date
     
-    # Map DB column name 'activity' to 'activity' to remain compatible with UI logic
     if 'activity' in df.columns:
         df.rename(columns={'activity': 'activity'}, inplace=True)
         
     df['score'] = df['score'].apply(lambda x: 0 if x < 0 else x)
     return df
 
-# --- SQLITE DATA LOADERS ---
+
 @st.cache_data(ttl=300)
 def load_achievements_data():
     if not os.path.exists(DB_FILE_A):
@@ -178,13 +184,11 @@ def load_achievements_data():
     conn = get_connection_A()
     df = pd.DataFrame()
     
-    # Try reading from achievements_log first
     try:
         df = pd.read_sql_query("SELECT * FROM achievements_log", conn)
     except Exception:
         pass
         
-    # Fallback to player_current_state if achievements_log is missing or empty
     if df.empty:
         try:
             df_state = pd.read_sql_query("SELECT * FROM player_current_state", conn)
@@ -204,11 +208,9 @@ def load_achievements_data():
     if df.empty:
         return pd.DataFrame()
         
-    # Normalize column names to title case
     cols = {col: col.title() for col in df.columns}
     df.rename(columns=cols, inplace=True)
     
-    # Handle timestamp variations
     time_col = None
     for possible in ['Detected_Timestamp', 'Timestamp', 'Detected_time', 'Date']:
         if possible in df.columns:
@@ -216,13 +218,13 @@ def load_achievements_data():
             break
             
     if time_col:
-        df['timestamp'] = pd.to_datetime(df[time_col], errors='coerce')
+        # FIX: Subtract 5 hours so early morning entries fall on the previous calendar day
+        df['timestamp'] = pd.to_datetime(df[time_col], errors='coerce') - pd.Timedelta(hours=5)
     else:
-        df['timestamp'] = pd.Timestamp.now()
+        df['timestamp'] = pd.Timestamp.now() - pd.Timedelta(hours=5)
         
     df['New_Value'] = pd.to_numeric(df.get('New_Value', 1), errors='coerce').fillna(1)
     return df
-
 xp_df = load_xp_data()
 act_df = load_activities_data()
 achievements_df = load_achievements_data()
