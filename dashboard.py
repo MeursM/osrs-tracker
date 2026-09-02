@@ -176,10 +176,14 @@ def load_achievements_data():
         conn.close()
         return None
     conn.close()
+    
     if df.empty:
         return None
     
-    # Standardize column naming from DB to expected UI names
+    # Normalize all column names to lowercase first to eliminate casing mismatches
+    df.columns = [c.lower() for c in df.columns]
+    
+    # Map lowercase database columns to UI format expected by the script
     column_mapping = {
         'player': 'Player',
         'entry_name': 'Entry_Name',
@@ -189,6 +193,7 @@ def load_achievements_data():
     }
     df.rename(columns=column_mapping, inplace=True)
     
+    # Safely assign timestamp
     if 'Detected_Timestamp' in df.columns:
         df['timestamp'] = pd.to_datetime(df['Detected_Timestamp'])
     elif 'timestamp' in df.columns:
