@@ -129,7 +129,10 @@ EHP_RATES = {
 # --- SQLITE DATA LOADERS ---
 def get_connection():
     return sqlite3.connect(DB_FILE)
-
+    
+def get_connection_A()
+    return sqlite3.connect(DB_FILE_A)
+    
 @st.cache_data(ttl=300)
 def load_xp_data():
     if not os.path.exists(DB_FILE):
@@ -172,7 +175,7 @@ def load_achievements_data():
     if not os.path.exists(DB_FILE_A):
         return pd.DataFrame()
     
-    conn = get_connection()
+    conn = get_connection_A()
     df = pd.DataFrame()
     
     # Try reading from achievements_log first
