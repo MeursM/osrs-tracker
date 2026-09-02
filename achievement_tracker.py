@@ -1,19 +1,48 @@
 import os
-import json
-import csv
+import sqlite3
 import requests
 from datetime import datetime
 
-# Save files directly in the same directory as this script
+# Database setup
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "gim_achievements.db")
 
-# Configuration for each player
 PLAYERS = {
     "Mas120": "STANDARD",
     "MrBSvenB": "STANDARD",
     "Phome1": "STANDARD",
     "Darallax": "STANDARD"
 }
+
+def init_db():
+    """Initialize SQLite database schema."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # Track logged changes (Unique constraint on player + entry_name)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS achievements_log (
+            player TEXT,
+            entry_name TEXT,
+            detected_timestamp TEXT,
+            old_value INTEGER,
+            new_value INTEGER,
+            PRIMARY KEY (player, entry_name)
+        )
+    ''')
+    
+    # Internal cache state table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS player_current_state (
+            player TEXT,
+            entry_name TEXT,
+            status_value INTEGER,
+            PRIMARY KEY (player, entry_name)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
 
 def fetch_player_data(username, profile):
     """Fetch current raw JSON state from WikiSync API."""
@@ -36,7 +65,7 @@ def extract_all_progress(data):
     if isinstance(quests, dict):
         for name, status in quests.items():
             if name != ".":
-                flat_state[f"Quest: {name}"] = status
+                flat_state[f"Quest: {name}"] = int(status) if isinstance(status, (int, bool)) else 0
 
     # 2. Achievement Diaries
     diaries = data.get("achievement_diaries", {})
@@ -69,31 +98,49 @@ def extract_all_progress(data):
 
     return flat_state
 
-def load_previous_state(username):
-    """Load cached state from disk if it exists."""
-    state_file = os.path.join(BASE_DIR, f"previous_state_{username}.json")
-    if os.path.exists(state_file):
-        with open(state_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return None
+def get_previous_state_from_db(conn, username):
+    """Get previously saved state from internal cache table."""
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT entry_name, status_value FROM player_current_state WHERE player = ?", 
+        (username,)
+    )
+    rows = cursor.fetchall()
+    return {row[0]: row[1] for row in rows} if rows else None
 
-def save_current_state(username, state):
-    """Save full progress state dictionary to previous_state_{username}.json."""
-    state_file = os.path.join(BASE_DIR, f"previous_state_{username}.json")
-    with open(state_file, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2, ensure_ascii=False)
+def update_player_state_in_db(conn, username, current_state):
+    """Upsert full state into the internal cache table."""
+    cursor = conn.cursor()
+    data_to_upsert = [(username, name, val) for name, val in current_state.items()]
+    
+    cursor.executemany('''
+        INSERT INTO player_current_state (player, entry_name, status_value)
+        VALUES (?, ?, ?)
+        ON CONFLICT(player, entry_name) DO UPDATE SET
+            status_value = excluded.status_value
+    ''', data_to_upsert)
+    conn.commit()
 
-def append_completion_to_csv(timestamp, username, name, old_val, new_val):
-    """Append row entry to achievements_log.csv"""
-    csv_file = os.path.join(BASE_DIR, "achievements_log.csv")
-    file_exists = os.path.exists(csv_file)
-
-    with open(csv_file, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["Detected_Timestamp", "Player", "Entry_Name", "Old_Value", "New_Value"])
-        
-        writer.writerow([timestamp, username, name, old_val, new_val])
+def upsert_achievement_logs(conn, timestamp, username, changes):
+    """Insert or update achievement rows only when actual progress occurs."""
+    cursor = conn.cursor()
+    
+    records = [
+        (username, entry_name, timestamp, old_val, new_val)
+        for entry_name, old_val, new_val in changes
+    ]
+    
+    # If the player + entry_name exists, update timestamp, old_val, and new_val
+    cursor.executemany('''
+        INSERT INTO achievements_log (player, entry_name, detected_timestamp, old_value, new_value)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(player, entry_name) DO UPDATE SET
+            detected_timestamp = excluded.detected_timestamp,
+            old_value = excluded.old_value,
+            new_value = excluded.new_value
+    ''', records)
+    
+    conn.commit()
 
 def process_player_achievements(username, profile):
     """Process achievements for a single player."""
@@ -103,30 +150,43 @@ def process_player_achievements(username, profile):
         return
 
     current_state = extract_all_progress(data)
-    prev_state = load_previous_state(username)
+    
+    conn = sqlite3.connect(DB_NAME)
+    prev_state = get_previous_state_from_db(conn, username)
     today_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # FIRST RUN: Log everything
     if prev_state is None:
-        print(f"First run for {username}! Extracted {len(current_state)} total items.")
-        for name, status in current_state.items():
-            append_completion_to_csv(today_date, username, name, 0, status)
+        print(f"First run for {username}! Setting baseline...")
+        # Only log items that already have completed progress (> 0) on the very first run
+        initial_changes = [
+            (name, 0, status) 
+            for name, status in current_state.items() 
+            if status > 0
+        ]
+        if initial_changes:
+            upsert_achievement_logs(conn, today_date, username, initial_changes)
     else:
-        # SUBSEQUENT RUNS: Only log changes
-        changes_count = 0
+        # Subsequent runs: calculate actual changes
+        changes = []
         for name, new_val in current_state.items():
             old_val = prev_state.get(name, 0)
+            
+            # Log ONLY when value changes (e.g. 0 -> 2, or 1 -> 2)
             if old_val != new_val:
-                append_completion_to_csv(today_date, username, name, old_val, new_val)
-                print(f"Change detected for {username}: {name} ({old_val} -> {new_val})")
-                changes_count += 1
+                changes.append((name, old_val, new_val))
+                print(f"Update for {username}: {name} ({old_val} -> {new_val})")
         
-        if changes_count == 0:
-            print(f"No changes for {username} today.")
+        if changes:
+            upsert_achievement_logs(conn, today_date, username, changes)
+        else:
+            print(f"No new progress for {username}.")
 
-    save_current_state(username, current_state)
+    # Update cache
+    update_player_state_in_db(conn, username, current_state)
+    conn.close()
 
 if __name__ == "__main__":
+    init_db()
     for username, profile in PLAYERS.items():
         process_player_achievements(username, profile)
-    print("Achievement tracking complete!")
+    print(f"Tracking complete! Updated {DB_NAME}")
