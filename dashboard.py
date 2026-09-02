@@ -219,7 +219,7 @@ def load_achievements_data():
             
     if time_col:
         # FIX: Subtract 5 hours so early morning entries fall on the previous calendar day
-        df['timestamp'] = pd.to_datetime(df[time_col], errors='coerce') - pd.Timedelta(hours=5)
+        df['timestamp'] = pd.to_datetime(df[time_col], errors='coerce') - pd.Timedelta(hours=8)
     else:
         df['timestamp'] = pd.Timestamp.now() - pd.Timedelta(hours=5)
         
