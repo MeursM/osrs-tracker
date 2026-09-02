@@ -130,7 +130,7 @@ EHP_RATES = {
 def get_connection():
     return sqlite3.connect(DB_FILE)
     
-def get_connection_A()
+def get_connection_A():
     return sqlite3.connect(DB_FILE_A)
     
 @st.cache_data(ttl=300)
