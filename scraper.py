@@ -1,5 +1,5 @@
 import requests
-import os
+import sqlite3
 import pandas as pd
 from datetime import datetime
 
@@ -13,6 +13,39 @@ SKILLS = [
     "Crafting", "Smithing", "Mining", "Herblore", "Agility", "Thieving",
     "Slayer", "Farming", "Runecraft", "Hunter", "Construction", "Sailing"
 ]
+
+DB_NAME = "gim_tracker.db"
+
+def init_db():
+    """Initialize the SQLite database and create tables if they don't exist."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    # Create Skills Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS skills_log (
+            timestamp TEXT,
+            player TEXT,
+            skill TEXT,
+            rank INTEGER,
+            level INTEGER,
+            xp INTEGER
+        )
+    ''')
+    
+    # Create Activities Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS activities_log (
+            timestamp TEXT,
+            player TEXT,
+            activity TEXT,
+            rank INTEGER,
+            score INTEGER
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
 
 def fetch_player_data(username):
     """Fetch player data using the JSON API (skills and activities)"""
@@ -32,7 +65,6 @@ def fetch_player_data(username):
         skills_data = data.get("skills", [])
         player_skills = []
         
-        # Parse skills array from JSON
         for skill_info in skills_data:
             skill_name = skill_info.get("name")
             if skill_name in SKILLS:
@@ -45,7 +77,7 @@ def fetch_player_data(username):
                     "xp": skill_info.get("xp", 0)
                 })
         
-        # Extract Activities (Bosses, Clues, Minigames, etc.)
+        # Extract Activities
         activities_data = data.get("activities", [])
         player_activities = []
         
@@ -64,6 +96,9 @@ def fetch_player_data(username):
         print(f"Error fetching data for {username}: {e}")
         return None, None
 
+# Initialize Database Schema
+init_db()
+
 # Collect all data
 all_skill_records = []
 all_activity_records = []
@@ -75,16 +110,20 @@ for member in group_members:
     if activities:
         all_activity_records.extend(activities)
 
-# Save Skills CSV
+# Save to SQLite Database
+conn = sqlite3.connect(DB_NAME)
+
 if all_skill_records:
     df_skills = pd.DataFrame(all_skill_records)
-    print("Skills data:")
+    print("Skills data preview:")
     print(df_skills.head(10))
-    df_skills.to_csv("gim_xp_log.csv", mode='a', header=not os.path.exists("gim_xp_log.csv"), index=False)
+    df_skills.to_sql("skills_log", conn, if_exists="append", index=False)
 
-# Save Activities CSV
 if all_activity_records:
     df_activities = pd.DataFrame(all_activity_records)
-    print("\nActivities data:")
+    print("\nActivities data preview:")
     print(df_activities.head(10))
-    df_activities.to_csv("gim_activities_log.csv", mode='a', header=not os.path.exists("gim_activities_log.csv"), index=False)
+    df_activities.to_sql("activities_log", conn, if_exists="append", index=False)
+
+conn.close()
+print(f"\nSuccessfully updated {DB_NAME}")
