@@ -132,8 +132,6 @@ def get_connection():
     
 def get_connection_A():
     return sqlite3.connect(DB_FILE_A)
-    
-# --- SQLITE DATA LOADERS (WITH TIMESHIFT FIX) ---
 
 @st.cache_data(ttl=300)
 def load_xp_data():
@@ -164,7 +162,6 @@ def load_activities_data():
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['date'] = df['timestamp'].dt.date
     
-    # Map DB column name 'activity' to 'activity' to remain compatible with UI logic
     if 'activity' in df.columns:
         df.rename(columns={'activity': 'activity'}, inplace=True)
         
@@ -179,13 +176,11 @@ def load_achievements_data():
     conn = get_connection_A()
     df = pd.DataFrame()
     
-    # Try reading from achievements_log first
     try:
         df = pd.read_sql_query("SELECT * FROM achievements_log", conn)
     except Exception:
         pass
         
-    # Fallback to player_current_state if achievements_log is missing or empty
     if df.empty:
         try:
             df_state = pd.read_sql_query("SELECT * FROM player_current_state", conn)
@@ -205,11 +200,9 @@ def load_achievements_data():
     if df.empty:
         return pd.DataFrame()
         
-    # Normalize column names to title case
     cols = {col: col.title() for col in df.columns}
     df.rename(columns=cols, inplace=True)
     
-    # Handle timestamp variations
     time_col = None
     for possible in ['Detected_Timestamp', 'Timestamp', 'Detected_time', 'Date']:
         if possible in df.columns:
@@ -223,6 +216,7 @@ def load_achievements_data():
         
     df['New_Value'] = pd.to_numeric(df.get('New_Value', 1), errors='coerce').fillna(1)
     return df
+
 xp_df = load_xp_data()
 act_df = load_activities_data()
 achievements_df = load_achievements_data()
@@ -233,431 +227,577 @@ if xp_df is None:
 
 all_players = sorted(xp_df['player'].unique().tolist())
 
-# --- HEADER SECTION ---
-h1, h2 = st.columns([3, 1])
+# --- MAIN NAVIGATION ---
+main_tab_group, main_tab_indiv = st.tabs(["👥 Group Overview", "👤 Individual Profile"])
 
-with h1:
-    selected_player = st.selectbox("👤 Switch Active Player Profile", all_players, index=0)
-    
-    p_df_raw = xp_df[xp_df['player'] == selected_player]
-    last_snap = p_df_raw['timestamp'].max()
-    time_diff = datetime.now() - last_snap if pd.notnull(last_snap) else timedelta(0)
-    mins_ago = int(time_diff.total_seconds() // 60)
-    
-    st.markdown(f"""
+# =========================================================
+# MAIN TAB 1: GROUP OVERVIEW
+# =========================================================
+with main_tab_group:
+    st.markdown("""
         <div class="profile-header">
-            <div class="profile-avatar">🛡️</div>
+            <div class="profile-avatar">⚔️</div>
             <div>
-                <h1 class="profile-title">{selected_player}</h1>
-                <p class="profile-subtitle">Group Ironman Member · Last updated {mins_ago} minutes ago</p>
+                <h1 class="profile-title">Group Ironman Overview</h1>
+                <p class="profile-subtitle">Comparing all group members across Skills, Bosses, and Achievements</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
-
-with h2:
     st.write("")
+
+    # Calculate Current Snapshot per Player
+    latest_date_group = xp_df['date'].max()
+    latest_xp_df = xp_df[xp_df['date'] == latest_date_group].copy()
+
+    # Calculate Total EHP per Player
+    latest_xp_df['EHP'] = latest_xp_df.apply(
+        lambda r: round(r['xp'] / EHP_RATES.get(r['skill'], 100000), 2) if r['skill'] != 'Overall' else 0, axis=1
+    )
+    player_ehp = latest_xp_df.groupby('player')['EHP'].sum().reset_index()
+
+    # Extract Overall XP & Total Level
+    overall_stats = latest_xp_df[latest_xp_df['skill'] == 'Overall'][['player', 'level', 'xp']].rename(
+        columns={'level': 'Total Level', 'xp': 'Total XP'}
+    )
+    
+    group_summary = pd.merge(overall_stats, player_ehp, on='player')
+    group_summary = group_summary.sort_values(by='Total XP', ascending=False)
+
+    # Top Metric Banner
+    col_g1, col_g2, col_g3, col_g4 = st.columns(4)
+    with col_g1:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Group Members</div>
+                <div class="metric-value">{len(all_players)}</div>
+            </div>
+        """, unsafe_allow_html=True)
+    with col_g2:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Combined Total XP</div>
+                <div class="metric-value">{group_summary['Total XP'].sum():,}</div>
+            </div>
+        """, unsafe_allow_html=True)
+    with col_g3:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Combined EHP</div>
+                <div class="metric-value">{group_summary['EHP'].sum():,.2f}</div>
+            </div>
+        """, unsafe_allow_html=True)
+    with col_g4:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Avg Total Level</div>
+                <div class="metric-value">{int(group_summary['Total Level'].mean()):,}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
     st.write("")
-    b1, b2 = st.columns(2)
-    with b1:
-        if st.button("Update Data", type="primary", use_container_width=True):
-            st.cache_data.clear()
-            st.rerun()
-    with b2:
-        st.button("•••", use_container_width=True)
-
-st.write("")
-
-# --- NAVIGATION TABS ---
-nav_tabs = ["Overview", "Gained", "Bosses & Activities", "Achievements"]
-selected_tab = st.radio("Navigation", nav_tabs, index=2, horizontal=True, label_visibility="collapsed")
-
-st.divider()
-
-# --- TOP METRICS CARDS ---
-earliest_snap = p_df_raw['timestamp'].min()
-sc1, sc2, sc3, sc4 = st.columns(4)
-
-with sc1:
-    st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-label">Last updated</div>
-            <div class="metric-value">{mins_ago} minutes ago</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with sc2:
-    st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-label">Last progressed</div>
-            <div class="metric-value">{p_df_raw['date'].max()}</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with sc3:
-    st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-label">Earliest snapshot in period</div>
-            <div class="metric-value">{earliest_snap.strftime('%Y-%m-%d') if pd.notnull(earliest_snap) else 'N/A'}</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with sc4:
-    st.markdown("""
-        <div class="metric-card">
-            <div class="metric-label">Exp drop in</div>
-            <div class="metric-value">Active Tracker</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.write("")
-
-# =========================================================
-# TAB: GAINED
-# =========================================================
-if selected_tab == "Gained":
-    st.subheader("Gained")
     
-    ctrl1, ctrl2, ctrl3 = st.columns([3, 1, 1])
-    with ctrl1:
-        timeframe = st.selectbox("Timeframe Window", ["Week", "Month", "Year", "All Time"], index=0)
-    with ctrl2:
-        category = st.selectbox("Category Filter", ["Skills", "Bosses & Activities"], index=0)
-    with ctrl3:
-        pass
+    # Sub-tabs within Group Overview
+    g_tab1, g_tab2, g_tab3 = st.tabs(["📊 Standings & Progression", "⚔️ Bosses & Activities", "🎯 Group Achievements"])
 
-    max_date = p_df_raw['date'].max()
-    if timeframe == "Week":
-        start_target = max_date - timedelta(days=7)
-    elif timeframe == "Month":
-        start_target = max_date - timedelta(days=30)
-    elif timeframe == "Year":
-        start_target = max_date - timedelta(days=365)
-    else:
-        start_target = p_df_raw['date'].min()
-
-    st.caption(f"{selected_player}'s gains in the last **{timeframe.lower()}** ({start_target} to {max_date})")
-
-    period_df = p_df_raw[(p_df_raw['date'] >= start_target) & (p_df_raw['date'] <= max_date)]
-    
-    if not period_df.empty:
-        start_records = period_df.sort_values('timestamp').groupby('skill').first().reset_index()
-        end_records = period_df.sort_values('timestamp').groupby('skill').last().reset_index()
-        
-        merged_gains = pd.merge(end_records, start_records, on='skill', suffixes=('_end', '_start'))
-        merged_gains['Exp.'] = merged_gains['xp_end'] - merged_gains['xp_start']
-        merged_gains['Levels'] = merged_gains['level_end'] - merged_gains['level_start']
-        
-        merged_gains['EHP'] = merged_gains.apply(
-            lambda r: round(r['Exp.'] / EHP_RATES.get(r['skill'], 100000), 2) if r['Exp.'] > 0 else 0.0, axis=1
-        )
-        
-        display_skills = merged_gains[['skill', 'Exp.', 'Levels', 'EHP']].copy()
-        display_skills.rename(columns={'skill': 'Skill'}, inplace=True)
-        
-        left_col, right_col = st.columns([4, 5])
-        
-        with left_col:
-            st.write("**Skills Summary**")
-            selection_event = st.dataframe(
-                display_skills,
+    with g_tab1:
+        c_left, c_right = st.columns([1, 1])
+        with c_left:
+            st.write("**Leaderboard**")
+            st.dataframe(
+                group_summary,
                 column_config={
-                    "Skill": st.column_config.TextColumn("Skill"),
-                    "Exp.": st.column_config.NumberColumn("Exp.", format="%d"),
-                    "Levels": st.column_config.NumberColumn("Levels", format="%d"),
+                    "player": st.column_config.TextColumn("Player"),
+                    "Total Level": st.column_config.NumberColumn("Total Level", format="%d"),
+                    "Total XP": st.column_config.NumberColumn("Total XP", format="%d"),
                     "EHP": st.column_config.NumberColumn("EHP", format="%.2f"),
                 },
                 hide_index=True,
-                use_container_width=True,
-                on_select="rerun",
-                selection_mode="single-row",
-                height=800
+                use_container_width=True
             )
-            
-            selected_skill = "Overall"
-            if len(selection_event.selection.rows) > 0:
-                selected_idx = selection_event.selection.rows[0]
-                selected_skill = display_skills.iloc[selected_idx]['Skill']
-        
-        with right_col:
-            skill_row = merged_gains[merged_gains['skill'] == selected_skill]
-            
-            if not skill_row.empty:
-                exp_gained_val = skill_row['Exp.'].values[0]
-                xp_start_val = skill_row['xp_start'].values[0]
-                xp_end_val = skill_row['xp_end'].values[0]
-                pct_gain = ((exp_gained_val / xp_start_val) * 100) if xp_start_val > 0 else 0.0
-            else:
-                exp_gained_val, xp_start_val, xp_end_val, pct_gain = 0, 0, 0, 0.0
-            
-            r_head1, r_head2 = st.columns([3, 2])
-            with r_head1:
-                st.markdown(f"### {selected_skill}")
-                st.caption(f"{exp_gained_val:,} exp. gained")
-            with r_head2:
-                st.selectbox("Metric Type", ["Experience", "Levels", "EHP"], label_visibility="collapsed")
-            
-            st.markdown(f"""
-                <div style="background-color: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 12px; margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <div>
-                            <span style="font-size: 11px; color: #8b949e;">Start</span><br/>
-                            <strong>{xp_start_val:,}</strong>
-                        </div>
-                        <div>
-                            <span style="font-size: 11px; color: #8b949e;">End</span><br/>
-                            <strong>{xp_end_val:,}</strong>
-                        </div>
-                        <div>
-                            <span style="font-size: 11px; color: #8b949e;">%</span><br/>
-                            <strong>{pct_gain:.2f}%</strong>
-                        </div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.write("**Cumulative experience gained**")
-            st.caption(f"A timeline of {selected_skill} experience over the past {timeframe.lower()}")
-            
-            skill_timeline = period_df[period_df['skill'] == selected_skill].sort_values('timestamp')
-            
-            if not skill_timeline.empty:
-                fig_cum = px.line(skill_timeline, x="date", y="xp")
-                fig_cum.update_traces(line_color="#2f81f7", line_width=2)
-                fig_cum.update_layout(
-                    plot_bgcolor="#0d1117",
-                    paper_bgcolor="#0d1117",
-                    font_color="#8b949e",
-                    margin=dict(l=20, r=20, t=10, b=20),
-                    height=240,
-                    xaxis=dict(showgrid=False, zeroline=False),
-                    yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
-                )
-                st.plotly_chart(fig_cum, use_container_width=True)
-            else:
-                st.info("No data points recorded for this skill in the period.")
-            
-            st.write("**Daily experience gained**")
-            st.caption(f"{selected_skill} experience gains bucketed by day")
-            
-            if len(skill_timeline) > 1:
-                skill_timeline['daily_gain'] = skill_timeline['xp'].diff().fillna(0)
-                skill_timeline['daily_gain'] = skill_timeline['daily_gain'].apply(lambda x: max(0, x))
-                
-                fig_bar = px.bar(skill_timeline, x="date", y="daily_gain")
-                fig_bar.update_traces(marker_color="#238636")
-                fig_bar.update_layout(
-                    plot_bgcolor="#0d1117",
-                    paper_bgcolor="#0d1117",
-                    font_color="#8b949e",
-                    margin=dict(l=20, r=20, t=10, b=20),
-                    height=200,
-                    xaxis=dict(showgrid=False, zeroline=False),
-                    yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
-                )
-                st.plotly_chart(fig_bar, use_container_width=True)
-            else:
-                st.markdown("""
-                    <div style="background-color: #0d1117; border: 1px solid #21262d; border-radius: 6px; height: 160px; display: flex; align-items: center; justify-content: center; color: #8b949e;">
-                        No daily gains recorded
-                    </div>
-                """, unsafe_allow_html=True)
-    else:
-        st.info("No records found for the selected player in this timeframe.")
 
-# =========================================================
-# TAB: OVERVIEW
-# =========================================================
-elif selected_tab == "Overview":
-    st.subheader("Player Overview & All-Skills Snapshot")
-    latest_date_all = p_df_raw['date'].max()
-    latest_player_skills = p_df_raw[p_df_raw['date'] == latest_date_all].sort_values('level', ascending=False)
-    
-    col_o1, col_o2 = st.columns([1, 1])
-    with col_o1:
-        st.write("**Current Skill Levels**")
-        st.dataframe(
-            latest_player_skills[['skill', 'level', 'xp']].rename(columns={'skill': 'Skill', 'level': 'Level', 'xp': 'Total XP'}),
-            hide_index=True,
-            use_container_width=True
-        )
-    with col_o2:
-        st.write("**Skill XP Distribution**")
-        fig_pie = px.pie(latest_player_skills[latest_player_skills['skill'] != 'Overall'], values='xp', names='skill', hole=0.4)
-        fig_pie.update_layout(paper_bgcolor="#0d1117", font_color="#c9d1d9")
-        st.plotly_chart(fig_pie, use_container_width=True)
-
-# =========================================================
-# TAB: BOSSES & ACTIVITIES (WISE OLD MAN RECORDS STYLE GRID)
-# =========================================================
-elif selected_tab == "Bosses & Activities":
-    st.subheader("⚔️ Boss Kills & Activity Records")
-    
-    if act_df is not None and not act_df.empty:
-        p_act = act_df[act_df['player'] == selected_player].copy()
-        
-        # 1. Filter out entries with 0 total kills / unranked
-        p_act_positive = p_act.groupby('activity')['score'].max()
-        valid_activities = p_act_positive[p_act_positive > 0].index.tolist()
-        
-        p_act_filtered = p_act[p_act['activity'].isin(valid_activities)].copy()
-        
-        if not p_act_filtered.empty:
-            activity_summary = []
-            
-            for act_name, group in p_act_filtered.groupby('activity'):
-                group = group.sort_values('timestamp')
-                latest_val = group['score'].iloc[-1]
-                latest_date = group['date'].iloc[-1]
-                latest_date_str = latest_date.strftime('%d %b %Y') if hasattr(latest_date, 'strftime') else str(latest_date)
-                
-                # Helper: get starting score prior to or at window start relative to this activity's latest date
-                def get_gain(days):
-                    cutoff = latest_date - timedelta(days=days)
-                    past_records = group[group['date'] <= cutoff]
-                    if not past_records.empty:
-                        base_val = past_records['score'].iloc[-1]
-                    else:
-                        base_val = group['score'].iloc[0]
-                    return latest_val - base_val
-
-                gain_day = get_gain(1)
-                gain_week = get_gain(7)
-                gain_month = get_gain(30)
-                gain_year = get_gain(365)
-                
-                activity_summary.append({
-                    'activity': act_name,
-                    'latest_val': latest_val,
-                    'latest_date_str': latest_date_str,
-                    'gain_day': gain_day,
-                    'gain_week': gain_week,
-                    'gain_month': gain_month,
-                    'gain_year': gain_year,
-                    'last_updated_sort': latest_date
-                })
-            
-            summary_df = pd.DataFrame(activity_summary)
-            
-            # 2. Sort by Most Recent Activity/Kills at top
-            summary_df = summary_df.sort_values(
-                by=['last_updated_sort', 'gain_week', 'latest_val'], 
-                ascending=[False, False, False]
+        with c_right:
+            st.write("**Total XP Comparison**")
+            fig_xp_comp = px.bar(
+                group_summary, 
+                x="player", 
+                y="Total XP", 
+                color="player",
+                text_auto=',.0f'
             )
-            
-            # 3. Render 3-Column Card Grid
-            cols = st.columns(3)
-            
-            for i, (_, row) in enumerate(summary_df.iterrows()):
-                col_idx = i % 3
-                with cols[col_idx]:
-                    def format_gain_row(label, gain_val, date_str):
-                        if gain_val > 0:
-                            val_html = f'<span class="record-gain-green">+{gain_val:,}</span>'
-                            date_html = f'<span style="font-size: 10px; color: #8b949e; margin-left: 6px;">{date_str}</span>'
-                        else:
-                            val_html = '<span class="record-muted">N/A</span>'
-                            date_html = '<span style="font-size: 10px; color: #484f58; margin-left: 6px;">Not set</span>'
-                            
-                        return f'<div class="record-row"><span class="record-timeframe">{label}</span><div>{val_html}{date_html}</div></div>'
+            fig_xp_comp.update_layout(
+                plot_bgcolor="#0d1117",
+                paper_bgcolor="#0d1117",
+                font_color="#8b949e",
+                showlegend=False,
+                height=300,
+                margin=dict(l=10, r=10, t=10, b=10)
+            )
+            st.plotly_chart(fig_xp_comp, use_container_width=True)
 
-                    day_row = format_gain_row("Day", row['gain_day'], row['latest_date_str'])
-                    week_row = format_gain_row("Week", row['gain_week'], row['latest_date_str'])
-                    month_row = format_gain_row("Month", row['gain_month'], row['latest_date_str'])
-                    year_row = format_gain_row("Year", row['gain_year'], row['latest_date_str'])
+        st.divider()
 
-                    card_html = (
-                        f'<div class="record-card">'
-                        f'<div class="record-title">⚔️ {row["activity"]}'
-                        f'<span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row["latest_val"]:,}</span>'
-                        f'</div>'
-                        f'{day_row}'
-                        f'{week_row}'
-                        f'{month_row}'
-                        f'{year_row}'
-                        f'</div>'
-                    )
-                    
-                    st.markdown(card_html, unsafe_allow_html=True)
+        st.write("**Skill Level Matrix**")
+        pivoted_skills = latest_xp_df[latest_xp_df['skill'] != 'Overall'].pivot(
+            index='skill', columns='player', values='level'
+        ).fillna(1).astype(int)
+        
+        st.dataframe(pivoted_skills, use_container_width=True)
+
+    with g_tab2:
+        st.write("**Group Boss Kills Comparison**")
+        if act_df is not None and not act_df.empty:
+            # Group latest scores by activity & player
+            act_latest = act_df.sort_values('timestamp').groupby(['player', 'activity']).last().reset_index()
+            act_latest = act_latest[act_latest['score'] > 0]
+            
+            if not act_latest.empty:
+                act_pivot = act_latest.pivot(index='activity', columns='player', values='score').fillna(0).astype(int)
+                act_pivot['Group Total'] = act_pivot.sum(axis=1)
+                act_pivot = act_pivot.sort_values(by='Group Total', ascending=False)
+                
+                st.dataframe(act_pivot, use_container_width=True)
+            else:
+                st.info("No recorded boss kills or activity points for any group member.")
         else:
-            st.info("No recorded boss kills or activity points for this player.")
-    else:
-        st.info("No activity data available.")
+            st.info("No activity data available.")
+
+    with g_tab3:
+        st.write("**Recent Achievements Across All Members**")
+        if achievements_df is not None and not achievements_df.empty:
+            completed_ach = achievements_df[achievements_df['New_Value'] >= 1].sort_values('timestamp', ascending=False)
+            if not completed_ach.empty:
+                display_group_ach = pd.DataFrame({
+                    "Player": completed_ach['Player'],
+                    "Achievement / Quest": completed_ach['Entry_Name'],
+                    "Completion Date": completed_ach['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S'),
+                    "Status": "✅ Completed"
+                })
+                st.dataframe(display_group_ach, hide_index=True, use_container_width=True)
+            else:
+                st.info("No completed achievements logged yet.")
+        else:
+            st.info("No achievement data available.")
 
 # =========================================================
-# TAB: ACHIEVEMENTS
+# MAIN TAB 2: INDIVIDUAL PROFILE (ORIGINAL DASHBOARD CODE)
 # =========================================================
-elif selected_tab == "Achievements":
-    st.subheader("🎯 Quests & Achievements")
+with main_tab_indiv:
+    # --- HEADER SECTION ---
+    h1, h2 = st.columns([3, 1])
 
-    # 1. Initialize session state
-    if 'ach_filter' not in st.session_state:
-        st.session_state.ach_filter = "Day"
+    with h1:
+        selected_player = st.selectbox("👤 Switch Active Player Profile", all_players, index=0)
+        
+        p_df_raw = xp_df[xp_df['player'] == selected_player]
+        last_snap = p_df_raw['timestamp'].max()
+        time_diff = datetime.now() - last_snap if pd.notnull(last_snap) else timedelta(0)
+        mins_ago = int(time_diff.total_seconds() // 60)
+        
+        st.markdown(f"""
+            <div class="profile-header">
+                <div class="profile-avatar">🛡️</div>
+                <div>
+                    <h1 class="profile-title">{selected_player}</h1>
+                    <p class="profile-subtitle">Group Ironman Member · Last updated {mins_ago} minutes ago</p>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
-    # 2. Update state FIRST via button callbacks or direct check
-    # Setting the state BEFORE rendering guarantees the UI updates on the first click
-    st.write("**Filter Completion Period:**")
-    col_day, col_week, col_month, col_year, _ = st.columns([1, 1, 1, 1, 2])
+    with h2:
+        st.write("")
+        st.write("")
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("Update Data", type="primary", use_container_width=True):
+                st.cache_data.clear()
+                st.rerun()
+        with b2:
+            st.button("•••", use_container_width=True)
 
-    if col_day.button("Day", use_container_width=True, type="primary" if st.session_state.ach_filter == "Day" else "secondary"):
-        st.session_state.ach_filter = "Day"
-        st.rerun()
+    st.write("")
 
-    if col_week.button("Week", use_container_width=True, type="primary" if st.session_state.ach_filter == "Week" else "secondary"):
-        st.session_state.ach_filter = "Week"
-        st.rerun()
-
-    if col_month.button("Month", use_container_width=True, type="primary" if st.session_state.ach_filter == "Month" else "secondary"):
-        st.session_state.ach_filter = "Month"
-        st.rerun()
-
-    if col_year.button("Year", use_container_width=True, type="primary" if st.session_state.ach_filter == "Year" else "secondary"):
-        st.session_state.ach_filter = "Year"
-        st.rerun()
+    # --- NAVIGATION TABS ---
+    nav_tabs = ["Overview", "Gained", "Bosses & Activities", "Achievements"]
+    selected_tab = st.radio("Navigation", nav_tabs, index=2, horizontal=True, label_visibility="collapsed")
 
     st.divider()
 
-    # Data verification and processing
-    if achievements_df is not None and not achievements_df.empty:
-        # Filter by selected player
-        p_ach = achievements_df[
-            (achievements_df['Player'] == selected_player) & 
-            (achievements_df['New_Value'] >= 1)
-        ].copy()
+    # --- TOP METRICS CARDS ---
+    earliest_snap = p_df_raw['timestamp'].min()
+    sc1, sc2, sc3, sc4 = st.columns(4)
 
-        if p_ach.empty:
-            st.info(f"No completed achievement records found for player: {selected_player}")
+    with sc1:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Last updated</div>
+                <div class="metric-value">{mins_ago} minutes ago</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with sc2:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Last progressed</div>
+                <div class="metric-value">{p_df_raw['date'].max()}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with sc3:
+        st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">Earliest snapshot in period</div>
+                <div class="metric-value">{earliest_snap.strftime('%Y-%m-%d') if pd.notnull(earliest_snap) else 'N/A'}</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with sc4:
+        st.markdown("""
+            <div class="metric-card">
+                <div class="metric-label">Exp drop in</div>
+                <div class="metric-value">Active Tracker</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.write("")
+
+    # =========================================================
+    # TAB: GAINED
+    # =========================================================
+    if selected_tab == "Gained":
+        st.subheader("Gained")
+        
+        ctrl1, ctrl2, ctrl3 = st.columns([3, 1, 1])
+        with ctrl1:
+            timeframe = st.selectbox("Timeframe Window", ["Week", "Month", "Year", "All Time"], index=0)
+        with ctrl2:
+            category = st.selectbox("Category Filter", ["Skills", "Bosses & Activities"], index=0)
+        with ctrl3:
+            pass
+
+        max_date = p_df_raw['date'].max()
+        if timeframe == "Week":
+            start_target = max_date - timedelta(days=7)
+        elif timeframe == "Month":
+            start_target = max_date - timedelta(days=30)
+        elif timeframe == "Year":
+            start_target = max_date - timedelta(days=365)
         else:
-            now = pd.Timestamp.now()
-            selected_filter = st.session_state.ach_filter
+            start_target = p_df_raw['date'].min()
 
-            if selected_filter == "Day":
-                start_boundary = now.floor('D')
-                period_label = "today"
-            elif selected_filter == "Week":
-                start_boundary = now - pd.Timedelta(days=7)
-                period_label = "in the last 7 days"
-            elif selected_filter == "Month":
-                start_boundary = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-                period_label = "this month"
-            elif selected_filter == "Year":
-                start_boundary = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-                period_label = "this year"
+        st.caption(f"{selected_player}'s gains in the last **{timeframe.lower()}** ({start_target} to {max_date})")
 
-            filtered_ach = p_ach[p_ach['timestamp'] >= start_boundary].copy()
+        period_df = p_df_raw[(p_df_raw['date'] >= start_target) & (p_df_raw['date'] <= max_date)]
+        
+        if not period_df.empty:
+            start_records = period_df.sort_values('timestamp').groupby('skill').first().reset_index()
+            end_records = period_df.sort_values('timestamp').groupby('skill').last().reset_index()
+            
+            merged_gains = pd.merge(end_records, start_records, on='skill', suffixes=('_end', '_start'))
+            merged_gains['Exp.'] = merged_gains['xp_end'] - merged_gains['xp_start']
+            merged_gains['Levels'] = merged_gains['level_end'] - merged_gains['level_start']
+            
+            merged_gains['EHP'] = merged_gains.apply(
+                lambda r: round(r['Exp.'] / EHP_RATES.get(r['skill'], 100000), 2) if r['Exp.'] > 0 else 0.0, axis=1
+            )
+            
+            display_skills = merged_gains[['skill', 'Exp.', 'Levels', 'EHP']].copy()
+            display_skills.rename(columns={'skill': 'Skill'}, inplace=True)
+            
+            left_col, right_col = st.columns([4, 5])
+            
+            with left_col:
+                st.write("**Skills Summary**")
+                selection_event = st.dataframe(
+                    display_skills,
+                    column_config={
+                        "Skill": st.column_config.TextColumn("Skill"),
+                        "Exp.": st.column_config.NumberColumn("Exp.", format="%d"),
+                        "Levels": st.column_config.NumberColumn("Levels", format="%d"),
+                        "EHP": st.column_config.NumberColumn("EHP", format="%.2f"),
+                    },
+                    hide_index=True,
+                    use_container_width=True,
+                    on_select="rerun",
+                    selection_mode="single-row",
+                    height=800
+                )
+                
+                selected_skill = "Overall"
+                if len(selection_event.selection.rows) > 0:
+                    selected_idx = selection_event.selection.rows[0]
+                    selected_skill = display_skills.iloc[selected_idx]['Skill']
+            
+            with right_col:
+                skill_row = merged_gains[merged_gains['skill'] == selected_skill]
+                
+                if not skill_row.empty:
+                    exp_gained_val = skill_row['Exp.'].values[0]
+                    xp_start_val = skill_row['xp_start'].values[0]
+                    xp_end_val = skill_row['xp_end'].values[0]
+                    pct_gain = ((exp_gained_val / xp_start_val) * 100) if xp_start_val > 0 else 0.0
+                else:
+                    exp_gained_val, xp_start_val, xp_end_val, pct_gain = 0, 0, 0, 0.0
+                
+                r_head1, r_head2 = st.columns([3, 2])
+                with r_head1:
+                    st.markdown(f"### {selected_skill}")
+                    st.caption(f"{exp_gained_val:,} exp. gained")
+                with r_head2:
+                    st.selectbox("Metric Type", ["Experience", "Levels", "EHP"], label_visibility="collapsed")
+                
+                st.markdown(f"""
+                    <div style="background-color: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <span style="font-size: 11px; color: #8b949e;">Start</span><br/>
+                                <strong>{xp_start_val:,}</strong>
+                            </div>
+                            <div>
+                                <span style="font-size: 11px; color: #8b949e;">End</span><br/>
+                                <strong>{xp_end_val:,}</strong>
+                            </div>
+                            <div>
+                                <span style="font-size: 11px; color: #8b949e;">%</span><br/>
+                                <strong>{pct_gain:.2f}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                st.write("**Cumulative experience gained**")
+                st.caption(f"A timeline of {selected_skill} experience over the past {timeframe.lower()}")
+                
+                skill_timeline = period_df[period_df['skill'] == selected_skill].sort_values('timestamp')
+                
+                if not skill_timeline.empty:
+                    fig_cum = px.line(skill_timeline, x="date", y="xp")
+                    fig_cum.update_traces(line_color="#2f81f7", line_width=2)
+                    fig_cum.update_layout(
+                        plot_bgcolor="#0d1117",
+                        paper_bgcolor="#0d1117",
+                        font_color="#8b949e",
+                        margin=dict(l=20, r=20, t=10, b=20),
+                        height=240,
+                        xaxis=dict(showgrid=False, zeroline=False),
+                        yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                    )
+                    st.plotly_chart(fig_cum, use_container_width=True)
+                else:
+                    st.info("No data points recorded for this skill in the period.")
+                
+                st.write("**Daily experience gained**")
+                st.caption(f"{selected_skill} experience gains bucketed by day")
+                
+                if len(skill_timeline) > 1:
+                    skill_timeline['daily_gain'] = skill_timeline['xp'].diff().fillna(0)
+                    skill_timeline['daily_gain'] = skill_timeline['daily_gain'].apply(lambda x: max(0, x))
+                    
+                    fig_bar = px.bar(skill_timeline, x="date", y="daily_gain")
+                    fig_bar.update_traces(marker_color="#238636")
+                    fig_bar.update_layout(
+                        plot_bgcolor="#0d1117",
+                        paper_bgcolor="#0d1117",
+                        font_color="#8b949e",
+                        margin=dict(l=20, r=20, t=10, b=20),
+                        height=200,
+                        xaxis=dict(showgrid=False, zeroline=False),
+                        yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                    )
+                    st.plotly_chart(fig_bar, use_container_width=True)
+                else:
+                    st.markdown("""
+                        <div style="background-color: #0d1117; border: 1px solid #21262d; border-radius: 6px; height: 160px; display: flex; align-items: center; justify-content: center; color: #8b949e;">
+                            No daily gains recorded
+                        </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info("No records found for the selected player in this timeframe.")
 
-            if not filtered_ach.empty:
-                filtered_ach = filtered_ach.sort_values('timestamp', ascending=False)
+    # =========================================================
+    # TAB: OVERVIEW
+    # =========================================================
+    elif selected_tab == "Overview":
+        st.subheader("Player Overview & All-Skills Snapshot")
+        latest_date_all = p_df_raw['date'].max()
+        latest_player_skills = p_df_raw[p_df_raw['date'] == latest_date_all].sort_values('level', ascending=False)
+        
+        col_o1, col_o2 = st.columns([1, 1])
+        with col_o1:
+            st.write("**Current Skill Levels**")
+            st.dataframe(
+                latest_player_skills[['skill', 'level', 'xp']].rename(columns={'skill': 'Skill', 'level': 'Level', 'xp': 'Total XP'}),
+                hide_index=True,
+                use_container_width=True
+            )
+        with col_o2:
+            st.write("**Skill XP Distribution**")
+            fig_pie = px.pie(latest_player_skills[latest_player_skills['skill'] != 'Overall'], values='xp', names='skill', hole=0.4)
+            fig_pie.update_layout(paper_bgcolor="#0d1117", font_color="#c9d1d9")
+            st.plotly_chart(fig_pie, use_container_width=True)
 
-                st.metric(label=f"Completed {period_label.capitalize()}", value=len(filtered_ach))
+    # =========================================================
+    # TAB: BOSSES & ACTIVITIES (WISE OLD MAN RECORDS STYLE GRID)
+    # =========================================================
+    elif selected_tab == "Bosses & Activities":
+        st.subheader("⚔️ Boss Kills & Activity Records")
+        
+        if act_df is not None and not act_df.empty:
+            p_act = act_df[act_df['player'] == selected_player].copy()
+            
+            p_act_positive = p_act.groupby('activity')['score'].max()
+            valid_activities = p_act_positive[p_act_positive > 0].index.tolist()
+            
+            p_act_filtered = p_act[p_act['activity'].isin(valid_activities)].copy()
+            
+            if not p_act_filtered.empty:
+                activity_summary = []
+                
+                for act_name, group in p_act_filtered.groupby('activity'):
+                    group = group.sort_values('timestamp')
+                    latest_val = group['score'].iloc[-1]
+                    latest_date = group['date'].iloc[-1]
+                    latest_date_str = latest_date.strftime('%d %b %Y') if hasattr(latest_date, 'strftime') else str(latest_date)
+                    
+                    def get_gain(days):
+                        cutoff = latest_date - timedelta(days=days)
+                        past_records = group[group['date'] <= cutoff]
+                        if not past_records.empty:
+                            base_val = past_records['score'].iloc[-1]
+                        else:
+                            base_val = group['score'].iloc[0]
+                        return latest_val - base_val
 
-                display_df = pd.DataFrame({
-                    "Achievement / Quest": filtered_ach['Entry_Name'],
-                    "Completion Date": filtered_ach['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S'),
-                    "Status": "✅ Completed"
-                })
+                    gain_day = get_gain(1)
+                    gain_week = get_gain(7)
+                    gain_month = get_gain(30)
+                    gain_year = get_gain(365)
+                    
+                    activity_summary.append({
+                        'activity': act_name,
+                        'latest_val': latest_val,
+                        'latest_date_str': latest_date_str,
+                        'gain_day': gain_day,
+                        'gain_week': gain_week,
+                        'gain_month': gain_month,
+                        'gain_year': gain_year,
+                        'last_updated_sort': latest_date
+                    })
+                
+                summary_df = pd.DataFrame(activity_summary)
+                
+                summary_df = summary_df.sort_values(
+                    by=['last_updated_sort', 'gain_week', 'latest_val'], 
+                    ascending=[False, False, False]
+                )
+                
+                cols = st.columns(3)
+                
+                for i, (_, row) in enumerate(summary_df.iterrows()):
+                    col_idx = i % 3
+                    with cols[col_idx]:
+                        def format_gain_row(label, gain_val, date_str):
+                            if gain_val > 0:
+                                val_html = f'<span class="record-gain-green">+{gain_val:,}</span>'
+                                date_html = f'<span style="font-size: 10px; color: #8b949e; margin-left: 6px;">{date_str}</span>'
+                            else:
+                                val_html = '<span class="record-muted">N/A</span>'
+                                date_html = '<span style="font-size: 10px; color: #484f58; margin-left: 6px;">Not set</span>'
+                                
+                            return f'<div class="record-row"><span class="record-timeframe">{label}</span><div>{val_html}{date_html}</div></div>'
 
-                st.dataframe(display_df, hide_index=True, use_container_width=True)
+                        day_row = format_gain_row("Day", row['gain_day'], row['latest_date_str'])
+                        week_row = format_gain_row("Week", row['gain_week'], row['latest_date_str'])
+                        month_row = format_gain_row("Month", row['gain_month'], row['latest_date_str'])
+                        year_row = format_gain_row("Year", row['gain_year'], row['latest_date_str'])
+
+                        card_html = (
+                            f'<div class="record-card">'
+                            f'<div class="record-title">⚔️ {row["activity"]}'
+                            f'<span style="font-size: 12px; font-weight: normal; color: #8b949e; margin-left: auto;">Total: {row["latest_val"]:,}</span>'
+                            f'</div>'
+                            f'{day_row}'
+                            f'{week_row}'
+                            f'{month_row}'
+                            f'{year_row}'
+                            f'</div>'
+                        )
+                        
+                        st.markdown(card_html, unsafe_allow_html=True)
             else:
-                st.info(f"No achievements or quests completed {period_label}.")
-    else:
-        st.info("No achievement data available in the database.")
+                st.info("No recorded boss kills or activity points for this player.")
+        else:
+            st.info("No activity data available.")
+
+    # =========================================================
+    # TAB: ACHIEVEMENTS
+    # =========================================================
+    elif selected_tab == "Achievements":
+        st.subheader("🎯 Quests & Achievements")
+
+        if 'ach_filter' not in st.session_state:
+            st.session_state.ach_filter = "Day"
+
+        st.write("**Filter Completion Period:**")
+        col_day, col_week, col_month, col_year, _ = st.columns([1, 1, 1, 1, 2])
+
+        if col_day.button("Day", use_container_width=True, type="primary" if st.session_state.ach_filter == "Day" else "secondary"):
+            st.session_state.ach_filter = "Day"
+            st.rerun()
+
+        if col_week.button("Week", use_container_width=True, type="primary" if st.session_state.ach_filter == "Week" else "secondary"):
+            st.session_state.ach_filter = "Week"
+            st.rerun()
+
+        if col_month.button("Month", use_container_width=True, type="primary" if st.session_state.ach_filter == "Month" else "secondary"):
+            st.session_state.ach_filter = "Month"
+            st.rerun()
+
+        if col_year.button("Year", use_container_width=True, type="primary" if st.session_state.ach_filter == "Year" else "secondary"):
+            st.session_state.ach_filter = "Year"
+            st.rerun()
+
+        st.divider()
+
+        if achievements_df is not None and not achievements_df.empty:
+            p_ach = achievements_df[
+                (achievements_df['Player'] == selected_player) & 
+                (achievements_df['New_Value'] >= 1)
+            ].copy()
+
+            if p_ach.empty:
+                st.info(f"No completed achievement records found for player: {selected_player}")
+            else:
+                now = pd.Timestamp.now()
+                selected_filter = st.session_state.ach_filter
+
+                if selected_filter == "Day":
+                    start_boundary = now.floor('D')
+                    period_label = "today"
+                elif selected_filter == "Week":
+                    start_boundary = now - pd.Timedelta(days=7)
+                    period_label = "in the last 7 days"
+                elif selected_filter == "Month":
+                    start_boundary = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                    period_label = "this month"
+                elif selected_filter == "Year":
+                    start_boundary = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+                    period_label = "this year"
+
+                filtered_ach = p_ach[p_ach['timestamp'] >= start_boundary].copy()
+
+                if not filtered_ach.empty:
+                    filtered_ach = filtered_ach.sort_values('timestamp', ascending=False)
+
+                    st.metric(label=f"Completed {period_label.capitalize()}", value=len(filtered_ach))
+
+                    display_df = pd.DataFrame({
+                        "Achievement / Quest": filtered_ach['Entry_Name'],
+                        "Completion Date": filtered_ach['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S'),
+                        "Status": "✅ Completed"
+                    })
+
+                    st.dataframe(display_df, hide_index=True, use_container_width=True)
+                else:
+                    st.info(f"No achievements or quests completed {period_label}.")
+        else:
+            st.info("No achievement data available in the database.")
