@@ -297,7 +297,12 @@ with main_tab_group:
     st.write("")
     
     # Sub-tabs within Group Overview
-    g_tab1, g_tab2, g_tab3 = st.tabs(["📊 Standings & Progression", "⚔️ Bosses & Activities", "🎯 Group Achievements"])
+    g_tab1, g_tab_prog, g_tab2, g_tab3 = st.tabs([
+        "📊 Standings", 
+        "📈 Group Progression & Charts", 
+        "⚔️ Bosses & Activities", 
+        "🎯 Group Achievements"
+    ])
 
     with g_tab1:
         c_left, c_right = st.columns([1, 1])
@@ -342,6 +347,115 @@ with main_tab_group:
         ).fillna(1).astype(int)
         
         st.dataframe(pivoted_skills, use_container_width=True)
+
+    # NEW TAB: GROUP PROGRESSION OVER TIME PER CATEGORY
+    with g_tab_prog:
+        st.subheader("📈 Group Experience & Progression Over Time")
+        
+        gc1, gc2, gc3, gc4 = st.columns([2, 2, 2, 2])
+        
+        with gc1:
+            data_type = st.selectbox("Category Type", ["Skills", "Bosses & Activities"], key="group_cat_type")
+        
+        with gc2:
+            if data_type == "Skills":
+                available_cats = sorted(xp_df['skill'].unique().tolist())
+                selected_cat = st.selectbox("Select Skill", available_cats, index=available_cats.index("Overall") if "Overall" in available_cats else 0, key="group_cat_select")
+            else:
+                if act_df is not None and not act_df.empty:
+                    available_cats = sorted(act_df['activity'].unique().tolist())
+                    selected_cat = st.selectbox("Select Activity/Boss", available_cats, index=0, key="group_act_select")
+                else:
+                    available_cats = []
+                    selected_cat = None
+                    st.selectbox("Select Activity/Boss", ["None Available"], disabled=True)
+
+        with gc3:
+            timeframe_g = st.selectbox("Timeframe", ["Week", "Month", "Year", "All Time"], index=3, key="group_timeframe")
+
+        with gc4:
+            view_mode = st.selectbox("Display Mode", ["Individual Overlay", "Group Aggregate Total"], key="group_view_mode")
+
+        st.write("")
+
+        # Calculate Timeframe Cutoff
+        max_dt = xp_df['date'].max()
+        if timeframe_g == "Week":
+            min_dt = max_dt - timedelta(days=7)
+        elif timeframe_g == "Month":
+            min_dt = max_dt - timedelta(days=30)
+        elif timeframe_g == "Year":
+            min_dt = max_dt - timedelta(days=365)
+        else:
+            min_dt = xp_df['date'].min()
+
+        # Render Chart based on Selection
+        if data_type == "Skills":
+            cat_df = xp_df[(xp_df['skill'] == selected_cat) & (xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt)].copy()
+            val_col = 'xp'
+            unit_label = "Experience"
+        else:
+            if act_df is not None and not act_df.empty and selected_cat:
+                cat_df = act_df[(act_df['activity'] == selected_cat) & (act_df['date'] >= min_dt) & (act_df['date'] <= max_dt)].copy()
+                val_col = 'score'
+                unit_label = "Kills / Score"
+            else:
+                cat_df = pd.DataFrame()
+
+        if not cat_df.empty:
+            cat_df = cat_df.sort_values('timestamp')
+
+            ch_col1, ch_col2 = st.columns([1, 1])
+
+            with ch_col1:
+                st.write(f"**Cumulative {selected_cat} {unit_label}**")
+                st.caption(f"Progress over time for {selected_cat.lower()}")
+                
+                if view_mode == "Individual Overlay":
+                    fig_group_cum = px.line(cat_df, x="date", y=val_col, color="player")
+                else:
+                    agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
+                    fig_group_cum = px.line(agg_df, x="date", y=val_col)
+                    fig_group_cum.update_traces(line_color="#2f81f7", line_width=2.5)
+
+                fig_group_cum.update_layout(
+                    plot_bgcolor="#0d1117",
+                    paper_bgcolor="#0d1117",
+                    font_color="#8b949e",
+                    margin=dict(l=20, r=20, t=10, b=20),
+                    height=300,
+                    xaxis=dict(showgrid=False, zeroline=False),
+                    yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                )
+                st.plotly_chart(fig_group_cum, use_container_width=True)
+
+            with ch_col2:
+                st.write(f"**Daily {selected_cat} Gains**")
+                st.caption(f"Daily increase in {selected_cat.lower()}")
+                
+                if view_mode == "Individual Overlay":
+                    cat_df['daily_gain'] = cat_df.groupby('player')[val_col].diff().fillna(0)
+                    cat_df['daily_gain'] = cat_df['daily_gain'].apply(lambda x: max(0, x))
+                    fig_group_bar = px.bar(cat_df, x="date", y="daily_gain", color="player", barmode="group")
+                else:
+                    agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
+                    agg_df['daily_gain'] = agg_df[val_col].diff().fillna(0)
+                    agg_df['daily_gain'] = agg_df['daily_gain'].apply(lambda x: max(0, x))
+                    fig_group_bar = px.bar(agg_df, x="date", y="daily_gain")
+                    fig_group_bar.update_traces(marker_color="#238636")
+
+                fig_group_bar.update_layout(
+                    plot_bgcolor="#0d1117",
+                    paper_bgcolor="#0d1117",
+                    font_color="#8b949e",
+                    margin=dict(l=20, r=20, t=10, b=20),
+                    height=300,
+                    xaxis=dict(showgrid=False, zeroline=False),
+                    yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                )
+                st.plotly_chart(fig_group_bar, use_container_width=True)
+        else:
+            st.info(f"No records available for {selected_cat} in the selected timeframe.")
 
     with g_tab2:
         st.write("**Group Boss Kills Comparison**")
