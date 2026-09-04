@@ -612,7 +612,7 @@ with main_tab_group:
 
         st.divider()
 
-        if achievements_df is not None and not achievements_df.empty:
+if achievements_df is not None and not achievements_df.empty:
             now = pd.Timestamp.now()
             tf_ach = st.session_state.group_ach_filter
 
@@ -627,16 +627,18 @@ with main_tab_group:
             else:
                 start_boundary = pd.Timestamp.min
 
+            # Ensure timestamps are uniform pandas datetimes and strip timezones for safe comparison
+            ach_df_copy = achievements_df.copy()
+            ach_df_copy['timestamp'] = pd.to_datetime(ach_df_copy['timestamp']).dt.tz_localize(None)
+
             # Filter completed achievements by period
-            completed_ach = achievements_df[
-                (achievements_df['New_Value'] >= 1) & 
-                (achievements_df['timestamp'] >= start_boundary)
+            completed_ach = ach_df_copy[
+                (ach_df_copy['New_Value'] >= 1) & 
+                (ach_df_copy['timestamp'] >= start_boundary)
             ].sort_values('timestamp', ascending=False)
 
             # Display a Card / Square for each player side-by-side
             ach_cols = st.columns(len(all_players))
-
-            # --- CHANGE THIS SECTION IN g_tab3 ---
 
             for idx, player_name in enumerate(all_players):
                 player_completed = completed_ach[completed_ach['Player'] == player_name]
@@ -664,7 +666,6 @@ with main_tab_group:
                             {ach_items_html}
                         </div>
                     """
-                    # ADD 'unsafe_allow_html=True' HERE
                     st.markdown(card_html, unsafe_allow_html=True)
         else:
             st.info("No achievement data available.")
