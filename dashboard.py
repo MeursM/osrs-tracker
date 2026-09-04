@@ -612,63 +612,63 @@ with main_tab_group:
 
         st.divider()
 
-if achievements_df is not None and not achievements_df.empty:
-            now = pd.Timestamp.now()
-            tf_ach = st.session_state.group_ach_filter
-
-            if tf_ach == "Day":
-                start_boundary = now.floor('D')
-            elif tf_ach == "Week":
-                start_boundary = now - pd.Timedelta(days=7)
-            elif tf_ach == "Month":
-                start_boundary = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            elif tf_ach == "Year":
-                start_boundary = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-            else:
-                start_boundary = pd.Timestamp.min
-
-            # Ensure timestamps are uniform pandas datetimes and strip timezones for safe comparison
-            ach_df_copy = achievements_df.copy()
-            ach_df_copy['timestamp'] = pd.to_datetime(ach_df_copy['timestamp']).dt.tz_localize(None)
-
-            # Filter completed achievements by period
-            completed_ach = ach_df_copy[
-                (ach_df_copy['New_Value'] >= 1) & 
-                (ach_df_copy['timestamp'] >= start_boundary)
-            ].sort_values('timestamp', ascending=False)
-
-            # Display a Card / Square for each player side-by-side
-            ach_cols = st.columns(len(all_players))
-
-            for idx, player_name in enumerate(all_players):
-                player_completed = completed_ach[completed_ach['Player'] == player_name]
+    if achievements_df is not None and not achievements_df.empty:
+                now = pd.Timestamp.now()
+                tf_ach = st.session_state.group_ach_filter
+    
+                if tf_ach == "Day":
+                    start_boundary = now.floor('D')
+                elif tf_ach == "Week":
+                    start_boundary = now - pd.Timedelta(days=7)
+                elif tf_ach == "Month":
+                    start_boundary = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                elif tf_ach == "Year":
+                    start_boundary = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+                else:
+                    start_boundary = pd.Timestamp.min
+    
+                # Ensure timestamps are uniform pandas datetimes and strip timezones for safe comparison
+                ach_df_copy = achievements_df.copy()
+                ach_df_copy['timestamp'] = pd.to_datetime(ach_df_copy['timestamp']).dt.tz_localize(None)
+    
+                # Filter completed achievements by period
+                completed_ach = ach_df_copy[
+                    (ach_df_copy['New_Value'] >= 1) & 
+                    (ach_df_copy['timestamp'] >= start_boundary)
+                ].sort_values('timestamp', ascending=False)
+    
+                # Display a Card / Square for each player side-by-side
+                ach_cols = st.columns(len(all_players))
+    
+                for idx, player_name in enumerate(all_players):
+                    player_completed = completed_ach[completed_ach['Player'] == player_name]
+                    
+                    with ach_cols[idx]:
+                        ach_items_html = ""
+                        if not player_completed.empty:
+                            for _, row in player_completed.iterrows():
+                                date_str = row['timestamp'].strftime('%b %d') if pd.notnull(row['timestamp']) else ""
+                                ach_items_html += f"""
+                                    <div class="ach-item">
+                                        <span>✅ {row['Entry_Name']}</span>
+                                        <span class="ach-date">{date_str}</span>
+                                    </div>
+                                """
+                        else:
+                            ach_items_html = '<div style="color: #484f58; font-size: 12px; font-style: italic;">No achievements in this timeframe</div>'
                 
-                with ach_cols[idx]:
-                    ach_items_html = ""
-                    if not player_completed.empty:
-                        for _, row in player_completed.iterrows():
-                            date_str = row['timestamp'].strftime('%b %d') if pd.notnull(row['timestamp']) else ""
-                            ach_items_html += f"""
-                                <div class="ach-item">
-                                    <span>✅ {row['Entry_Name']}</span>
-                                    <span class="ach-date">{date_str}</span>
+                        card_html = f"""
+                            <div class="player-ach-card">
+                                <div class="player-ach-header">
+                                    <span>👤 {player_name}</span>
+                                    <span style="font-size: 12px; color: #8b949e; font-weight: normal;">({len(player_completed)})</span>
                                 </div>
-                            """
-                    else:
-                        ach_items_html = '<div style="color: #484f58; font-size: 12px; font-style: italic;">No achievements in this timeframe</div>'
-            
-                    card_html = f"""
-                        <div class="player-ach-card">
-                            <div class="player-ach-header">
-                                <span>👤 {player_name}</span>
-                                <span style="font-size: 12px; color: #8b949e; font-weight: normal;">({len(player_completed)})</span>
+                                {ach_items_html}
                             </div>
-                            {ach_items_html}
-                        </div>
-                    """
-                    st.markdown(card_html, unsafe_allow_html=True)
-        else:
-            st.info("No achievement data available.")
+                        """
+                        st.markdown(card_html, unsafe_allow_html=True)
+            else:
+                st.info("No achievement data available.")
 
 # =========================================================
 # MAIN TAB 2: INDIVIDUAL PROFILE (ORIGINAL DASHBOARD CODE)
