@@ -348,9 +348,9 @@ with main_tab_group:
         
         st.dataframe(pivoted_skills, use_container_width=True)
 
-    # NEW TAB: GROUP PROGRESSION OVER TIME PER CATEGORY
+    # GROUP PROGRESSION OVER TIME PER CATEGORY (BASELINED AT 0)
     with g_tab_prog:
-        st.subheader("📈 Group Experience & Progression Over Time")
+        st.subheader("📈 Group Relative Progression Over Time")
         
         gc1, gc2, gc3, gc4 = st.columns([2, 2, 2, 2])
         
@@ -405,17 +405,26 @@ with main_tab_group:
         if not cat_df.empty:
             cat_df = cat_df.sort_values('timestamp')
 
+            # BASELINE TO ZERO: Compute relative gains starting at 0 from the start of the selected timeframe
+            if view_mode == "Individual Overlay":
+                start_vals = cat_df.groupby('player')[val_col].transform('first')
+                cat_df['relative_val'] = cat_df[val_col] - start_vals
+                y_chart_col = 'relative_val'
+            else:
+                agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
+                agg_df['relative_val'] = agg_df[val_col] - agg_df[val_col].iloc[0]
+                y_chart_col = 'relative_val'
+
             ch_col1, ch_col2 = st.columns([1, 1])
 
             with ch_col1:
-                st.write(f"**Cumulative {selected_cat} {unit_label}**")
-                st.caption(f"Progress over time for {selected_cat.lower()}")
+                st.write(f"**Gained {selected_cat} {unit_label} (Starting at 0)**")
+                st.caption(f"Relative progression over time during the selected {timeframe_g.lower()}")
                 
                 if view_mode == "Individual Overlay":
-                    fig_group_cum = px.line(cat_df, x="date", y=val_col, color="player")
+                    fig_group_cum = px.line(cat_df, x="date", y=y_chart_col, color="player", labels={'relative_val': f'Gained {unit_label}'})
                 else:
-                    agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
-                    fig_group_cum = px.line(agg_df, x="date", y=val_col)
+                    fig_group_cum = px.line(agg_df, x="date", y=y_chart_col, labels={'relative_val': f'Group Gained {unit_label}'})
                     fig_group_cum.update_traces(line_color="#2f81f7", line_width=2.5)
 
                 fig_group_cum.update_layout(
@@ -436,12 +445,11 @@ with main_tab_group:
                 if view_mode == "Individual Overlay":
                     cat_df['daily_gain'] = cat_df.groupby('player')[val_col].diff().fillna(0)
                     cat_df['daily_gain'] = cat_df['daily_gain'].apply(lambda x: max(0, x))
-                    fig_group_bar = px.bar(cat_df, x="date", y="daily_gain", color="player", barmode="group")
+                    fig_group_bar = px.bar(cat_df, x="date", y="daily_gain", color="player", barmode="group", labels={'daily_gain': f'Daily {unit_label}'})
                 else:
-                    agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
                     agg_df['daily_gain'] = agg_df[val_col].diff().fillna(0)
                     agg_df['daily_gain'] = agg_df['daily_gain'].apply(lambda x: max(0, x))
-                    fig_group_bar = px.bar(agg_df, x="date", y="daily_gain")
+                    fig_group_bar = px.bar(agg_df, x="date", y="daily_gain", labels={'daily_gain': f'Daily Group {unit_label}'})
                     fig_group_bar.update_traces(marker_color="#238636")
 
                 fig_group_bar.update_layout(
