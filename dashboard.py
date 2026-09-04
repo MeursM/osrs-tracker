@@ -104,6 +104,38 @@ st.markdown("""
     .record-muted {
         color: #484f58;
     }
+
+    /* Player Achievement Square/Card Styles */
+    .player-ach-card {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        min-height: 180px;
+    }
+    .player-ach-header {
+        font-size: 16px;
+        font-weight: 700;
+        color: #58a6ff;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #30363d;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .ach-item {
+        font-size: 12px;
+        padding: 4px 0;
+        color: #c9d1d9;
+        display: flex;
+        justify-content: space-between;
+    }
+    .ach-date {
+        color: #8b949e;
+        font-size: 10px;
+    }
     
     div[data-baseweb="select"] > div {
         background-color: #161b22 !important;
@@ -465,38 +497,172 @@ with main_tab_group:
         else:
             st.info(f"No records available for {selected_cat} in the selected timeframe.")
 
+    # =========================================================
+    # TAB: GROUP BOSSES & ACTIVITIES (TIMEFRAME GAINS ONLY)
+    # =========================================================
     with g_tab2:
-        st.write("**Group Boss Kills Comparison**")
+        st.write("**Group Boss Kills & Activity Gains**")
+
+        if 'group_act_filter' not in st.session_state:
+            st.session_state.group_act_filter = "Week"
+
+        b_day, b_week, b_month, b_year, b_all, _ = st.columns([1, 1, 1, 1, 1, 2])
+        if b_day.button("Day", key="gab_day", use_container_width=True, type="primary" if st.session_state.group_act_filter == "Day" else "secondary"):
+            st.session_state.group_act_filter = "Day"
+            st.rerun()
+        if b_week.button("Week", key="gab_week", use_container_width=True, type="primary" if st.session_state.group_act_filter == "Week" else "secondary"):
+            st.session_state.group_act_filter = "Week"
+            st.rerun()
+        if b_month.button("Month", key="gab_month", use_container_width=True, type="primary" if st.session_state.group_act_filter == "Month" else "secondary"):
+            st.session_state.group_act_filter = "Month"
+            st.rerun()
+        if b_year.button("Year", key="gab_year", use_container_width=True, type="primary" if st.session_state.group_act_filter == "Year" else "secondary"):
+            st.session_state.group_act_filter = "Year"
+            st.rerun()
+        if b_all.button("All Time", key="gab_all", use_container_width=True, type="primary" if st.session_state.group_act_filter == "All Time" else "secondary"):
+            st.session_state.group_act_filter = "All Time"
+            st.rerun()
+
+        st.divider()
+
         if act_df is not None and not act_df.empty:
-            # Group latest scores by activity & player
-            act_latest = act_df.sort_values('timestamp').groupby(['player', 'activity']).last().reset_index()
-            act_latest = act_latest[act_latest['score'] > 0]
-            
-            if not act_latest.empty:
-                act_pivot = act_latest.pivot(index='activity', columns='player', values='score').fillna(0).astype(int)
-                act_pivot['Group Total'] = act_pivot.sum(axis=1)
-                act_pivot = act_pivot.sort_values(by='Group Total', ascending=False)
-                
-                st.dataframe(act_pivot, use_container_width=True)
+            max_act_date = act_df['date'].max()
+            tf = st.session_state.group_act_filter
+
+            if tf == "Day":
+                min_act_date = max_act_date - timedelta(days=1)
+            elif tf == "Week":
+                min_act_date = max_act_date - timedelta(days=7)
+            elif tf == "Month":
+                min_act_date = max_act_date - timedelta(days=30)
+            elif tf == "Year":
+                min_act_date = max_act_date - timedelta(days=365)
             else:
-                st.info("No recorded boss kills or activity points for any group member.")
+                min_act_date = act_df['date'].min()
+
+            # Filter data up to the cutoff
+            act_window = act_df[(act_df['date'] >= min_act_date) & (act_df['date'] <= max_act_date)].copy()
+
+            if not act_window.empty:
+                # Get start and end values per player/activity in window
+                start_acts = act_window.sort_values('timestamp').groupby(['activity', 'player'])['score'].first().reset_index()
+                end_acts = act_window.sort_values('timestamp').groupby(['activity', 'player'])['score'].last().reset_index()
+
+                merged_act = pd.merge(end_acts, start_acts, on=['activity', 'player'], suffixes=('_end', '_start'))
+                
+                if tf == "All Time":
+                    merged_act['Gain'] = merged_act['score_end']
+                else:
+                    merged_act['Gain'] = merged_act['score_end'] - merged_act['score_start']
+
+                merged_act['Gain'] = merged_act['Gain'].apply(lambda x: max(0, x))
+
+                # Pivot data to show Activity x Players
+                act_pivot = merged_act.pivot(index='activity', columns='player', values='Gain').fillna(0).astype(int)
+                
+                # Add total group gain column
+                act_pivot['Group Total Gain'] = act_pivot.sum(axis=1)
+
+                # Filter out activities where NO ONE gained anything during the period
+                active_pivot = act_pivot[act_pivot['Group Total Gain'] > 0].sort_values(by='Group Total Gain', ascending=False)
+
+                if not active_pivot.empty:
+                    st.caption(f"Showing **{len(active_pivot)}** bosses/activities completed or gained during the selected timeframe (**{tf}**)")
+                    
+                    column_cfgs = {
+                        "Group Total Gain": st.column_config.NumberColumn("Group Total Gain", format="%d")
+                    }
+                    for p in all_players:
+                        if p in active_pivot.columns:
+                            column_cfgs[p] = st.column_config.NumberColumn(f"{p}", format="%d")
+
+                    st.dataframe(active_pivot, column_config=column_cfgs, use_container_width=True)
+                else:
+                    st.info(f"No boss kills or activity points recorded in the selected timeframe (**{tf}**).")
+            else:
+                st.info(f"No activity records found within the timeframe (**{tf}**).")
         else:
             st.info("No activity data available.")
 
+    # =========================================================
+    # TAB: GROUP ACHIEVEMENTS (SQUARES PER PLAYER LAYOUT)
+    # =========================================================
     with g_tab3:
-        st.write("**Recent Achievements Across All Members**")
+        st.write("**Group Achievements & Quests Completed**")
+
+        if 'group_ach_filter' not in st.session_state:
+            st.session_state.group_ach_filter = "Week"
+
+        a_day, a_week, a_month, a_year, a_all, _ = st.columns([1, 1, 1, 1, 1, 2])
+        if a_day.button("Day", key="ga_day", use_container_width=True, type="primary" if st.session_state.group_ach_filter == "Day" else "secondary"):
+            st.session_state.group_ach_filter = "Day"
+            st.rerun()
+        if a_week.button("Week", key="ga_week", use_container_width=True, type="primary" if st.session_state.group_ach_filter == "Week" else "secondary"):
+            st.session_state.group_ach_filter = "Week"
+            st.rerun()
+        if a_month.button("Month", key="ga_month", use_container_width=True, type="primary" if st.session_state.group_ach_filter == "Month" else "secondary"):
+            st.session_state.group_ach_filter = "Month"
+            st.rerun()
+        if a_year.button("Year", key="ga_year", use_container_width=True, type="primary" if st.session_state.group_ach_filter == "Year" else "secondary"):
+            st.session_state.group_ach_filter = "Year"
+            st.rerun()
+        if a_all.button("All Time", key="ga_all", use_container_width=True, type="primary" if st.session_state.group_ach_filter == "All Time" else "secondary"):
+            st.session_state.group_ach_filter = "All Time"
+            st.rerun()
+
+        st.divider()
+
         if achievements_df is not None and not achievements_df.empty:
-            completed_ach = achievements_df[achievements_df['New_Value'] >= 1].sort_values('timestamp', ascending=False)
-            if not completed_ach.empty:
-                display_group_ach = pd.DataFrame({
-                    "Player": completed_ach['Player'],
-                    "Achievement / Quest": completed_ach['Entry_Name'],
-                    "Completion Date": completed_ach['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S'),
-                    "Status": "✅ Completed"
-                })
-                st.dataframe(display_group_ach, hide_index=True, use_container_width=True)
+            now = pd.Timestamp.now()
+            tf_ach = st.session_state.group_ach_filter
+
+            if tf_ach == "Day":
+                start_boundary = now.floor('D')
+            elif tf_ach == "Week":
+                start_boundary = now - pd.Timedelta(days=7)
+            elif tf_ach == "Month":
+                start_boundary = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            elif tf_ach == "Year":
+                start_boundary = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
             else:
-                st.info("No completed achievements logged yet.")
+                start_boundary = pd.Timestamp.min
+
+            # Filter completed achievements by period
+            completed_ach = achievements_df[
+                (achievements_df['New_Value'] >= 1) & 
+                (achievements_df['timestamp'] >= start_boundary)
+            ].sort_values('timestamp', ascending=False)
+
+            # Display a Card / Square for each player side-by-side
+            ach_cols = st.columns(len(all_players))
+
+            for idx, player_name in enumerate(all_players):
+                player_completed = completed_ach[completed_ach['Player'] == player_name]
+                
+                with ach_cols[idx]:
+                    ach_items_html = ""
+                    if not player_completed.empty:
+                        for _, row in player_completed.iterrows():
+                            date_str = row['timestamp'].strftime('%b %d') if pd.notnull(row['timestamp']) else ""
+                            ach_items_html += f"""
+                                <div class="ach-item">
+                                    <span>✅ {row['Entry_Name']}</span>
+                                    <span class="ach-date">{date_str}</span>
+                                </div>
+                            """
+                    else:
+                        ach_items_html = '<div style="color: #484f58; font-size: 12px; font-style: italic;">No achievements in this timeframe</div>'
+
+                    card_html = f"""
+                        <div class="player-ach-card">
+                            <div class="player-ach-header">
+                                <span>👤 {player_name}</span>
+                                <span style="font-size: 12px; color: #8b949e; font-weight: normal;">({len(player_completed)})</span>
+                            </div>
+                            {ach_items_html}
+                        </div>
+                    """
+                    st.markdown(card_html, unsafe_allow_html=True)
         else:
             st.info("No achievement data available.")
 
