@@ -636,6 +636,8 @@ with main_tab_group:
             # Display a Card / Square for each player side-by-side
             ach_cols = st.columns(len(all_players))
 
+            # --- CHANGE THIS SECTION IN g_tab3 ---
+
             for idx, player_name in enumerate(all_players):
                 player_completed = completed_ach[completed_ach['Player'] == player_name]
                 
@@ -652,7 +654,7 @@ with main_tab_group:
                             """
                     else:
                         ach_items_html = '<div style="color: #484f58; font-size: 12px; font-style: italic;">No achievements in this timeframe</div>'
-
+            
                     card_html = f"""
                         <div class="player-ach-card">
                             <div class="player-ach-header">
@@ -662,6 +664,7 @@ with main_tab_group:
                             {ach_items_html}
                         </div>
                     """
+                    # ADD 'unsafe_allow_html=True' HERE
                     st.markdown(card_html, unsafe_allow_html=True)
         else:
             st.info("No achievement data available.")
