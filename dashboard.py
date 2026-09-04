@@ -644,24 +644,21 @@ with main_tab_group:
                     if not player_completed.empty:
                         for _, row in player_completed.iterrows():
                             date_str = row['timestamp'].strftime('%b %d') if pd.notnull(row['timestamp']) else ""
-                            ach_items_html += f"""
-                                <div class="ach-item">
-                                    <span>✅ {row['Entry_Name']}</span>
-                                    <span class="ach-date">{date_str}</span>
-                                </div>
-                            """
+                            # Unindented HTML string to avoid Streamlit Markdown code block parsing
+                            ach_items_html += f'<div class="ach-item"><span>✅ {row["Entry_Name"]}</span><span class="ach-date">{date_str}</span></div>'
                     else:
                         ach_items_html = '<div style="color: #484f58; font-size: 12px; font-style: italic;">No achievements in this timeframe</div>'
 
-                    card_html = f"""
-                        <div class="player-ach-card">
-                            <div class="player-ach-header">
-                                <span>👤 {player_name}</span>
-                                <span style="font-size: 12px; color: #8b949e; font-weight: normal;">({len(player_completed)})</span>
-                            </div>
-                            {ach_items_html}
-                        </div>
-                    """
+                    # Keep overall card HTML flush to prevent code block interpretation
+                    card_html = (
+                        f'<div class="player-ach-card">'
+                        f'<div class="player-ach-header">'
+                        f'<span>👤 {player_name}</span>'
+                        f'<span style="font-size: 12px; color: #8b949e; font-weight: normal;">({len(player_completed)})</span>'
+                        f'</div>'
+                        f'{ach_items_html}'
+                        f'</div>'
+                    )
                     st.markdown(card_html, unsafe_allow_html=True)
         else:
             st.info("No achievement data available.")
