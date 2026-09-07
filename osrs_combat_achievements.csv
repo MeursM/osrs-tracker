@@ -1,0 +1,656 @@
+Task ID,Tier,Boss/Activity,Task Name,Explanation
+1,Easy,Barrows,Barrows Novice,Defeat all 6 Barrows brothers once.
+2,Easy,Bryophyta,Bryophyta Novice,Kill Bryophyta once.
+3,Easy,Bryophyta,F2P Bryophyta,Kill Bryophyta on a free-to-play world.
+4,Easy,Deranged Archaeologist,Deranged Archaeologist Novice,Kill the Deranged Archaeologist once.
+5,Easy,Giant Mole,Giant Mole Novice,Kill the Giant Mole once.
+6,Easy,Obor,Obor Novice,Kill Obor once.
+7,Easy,Obor,F2P Obor,Kill Obor on a free-to-play world.
+8,Easy,Scurrius,Scurrius Novice,Kill Scurrius once.
+9,Easy,Tempoross,Tempoross Novice,Subdue Tempoross once.
+10,Easy,Wintertodt,Wintertodt Novice,Subdue the Wintertodt once.
+11,Medium,Barrows,Barrows Champion,Defeat all 6 Barrows brothers 10 times.
+12,Medium,Bryophyta,Bryophyta Champion,Kill Bryophyta 5 times.
+13,Medium,Dagannoth Kings,Dagannoth Supreme Novice,Kill Dagannoth Supreme once.
+14,Medium,Dagannoth Kings,Dagannoth Rex Novice,Kill Dagannoth Rex once.
+15,Medium,Dagannoth Kings,Dagannoth Prime Novice,Kill Dagannoth Prime once.
+16,Medium,Giant Mole,Giant Mole Champion,Kill the Giant Mole 10 times.
+17,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+18,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+19,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+20,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+21,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+22,Hard,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+23,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+24,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+25,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+26,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+27,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+28,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+29,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+30,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+31,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+32,Master,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+33,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+34,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+35,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+36,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+37,Grandmaster,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+38,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+39,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+40,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+41,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+42,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+43,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+44,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+45,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+46,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+47,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+48,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+49,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+50,Master,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+51,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+52,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+53,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+54,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+55,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+56,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+57,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+58,Grandmaster,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+59,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+60,Master,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+61,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+62,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+63,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+64,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+65,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+66,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+67,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+68,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+69,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+70,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+71,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+72,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+73,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+74,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+75,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+76,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+77,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+78,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+79,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+80,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+81,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+82,Master,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+83,Elite,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+84,Hard,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+85,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+86,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+87,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+88,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+89,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+90,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+91,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+92,Elite,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+93,Hard,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+94,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+95,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+96,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+97,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+98,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+99,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+100,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+101,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+102,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+103,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+104,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+105,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+106,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+107,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+108,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+109,Elite,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+110,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+111,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+112,Elite,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+113,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+114,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+115,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+116,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+117,Elite,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+118,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+119,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+120,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+121,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+122,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+123,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+124,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+125,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+126,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+127,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+128,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+129,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+130,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+131,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+132,Hard,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+133,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+134,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+135,Grandmaster,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+136,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+137,Elite,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+138,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+139,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+140,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+141,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+142,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+143,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+144,Hard,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+145,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+146,Grandmaster,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+147,Elite,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+148,Hard,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+149,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+150,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+151,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+152,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+153,Hard,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+154,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+155,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+156,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+157,Elite,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+158,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+159,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+160,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+161,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+162,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+163,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+164,Medium,King Black Dragon,Claw Clipper,Kill the King Black Dragon with Protect from Melee activated.
+165,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+166,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+167,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+168,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+169,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+170,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+171,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+172,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+173,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+174,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+175,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+176,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+177,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+178,Elite,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+179,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+180,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+181,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+182,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+183,Master,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+184,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+185,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+186,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+187,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+188,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+189,Hard,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+190,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+191,Elite,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+192,Master,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+193,Hard,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+194,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+195,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+196,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+197,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+198,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+199,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+200,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+201,Grandmaster,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+202,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+203,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+204,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+205,Elite,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+206,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+207,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+208,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+209,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+210,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+211,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+212,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+213,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+214,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+215,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+216,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+217,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+218,Hard,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+219,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+220,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+221,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+222,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+223,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+224,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+225,Elite,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+226,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+227,Master,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+228,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+229,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+230,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+231,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+232,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+233,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+234,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+235,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+236,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+237,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+238,Master,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+239,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+240,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+241,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+242,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+243,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+244,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+245,Master,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+246,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+247,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+248,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+249,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+250,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+251,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+252,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+253,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+254,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+255,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+256,Hard,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+257,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+258,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+259,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+260,Elite,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+261,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+262,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+263,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+264,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+265,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+266,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+267,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+268,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+269,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+270,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+271,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+272,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+273,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+274,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+275,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+276,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+277,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+278,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+279,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+280,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+281,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+282,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+283,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+284,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+285,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+286,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+287,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+288,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+289,Elite,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+290,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+291,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+292,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+293,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+294,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+295,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+296,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+297,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+298,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+299,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+300,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+301,Elite,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+302,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+303,Grandmaster,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+304,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+305,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+306,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+307,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+308,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+309,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+310,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+311,Hard,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+312,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+313,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+314,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+315,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+316,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+317,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+318,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+319,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+320,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+321,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+322,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+323,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+324,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+325,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+326,Hard,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+327,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+328,Hard,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+329,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+330,Grandmaster,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+331,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+332,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+333,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+334,Elite,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+335,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+336,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+337,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+338,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+339,Elite,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+340,Master,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+341,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+342,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+343,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+344,Master,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+345,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+346,Master,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+347,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+348,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+349,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+350,Elite,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+351,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+352,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+353,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+354,Grandmaster,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+355,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+356,Master,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+357,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+358,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+359,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+360,Master,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+361,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+362,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+363,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+364,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+365,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+366,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+367,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+368,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+369,Master,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+370,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+371,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+372,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+373,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+374,Hard,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+375,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+376,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+377,Master,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+378,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+379,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+380,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+381,Grandmaster,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+382,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+383,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+384,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+385,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+386,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+387,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+388,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+389,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+390,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+391,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+392,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+393,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+394,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+395,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+396,Hard,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+397,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+398,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+399,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+400,Elite,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+401,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+402,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+403,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+404,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+405,Hard,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+406,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+407,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+408,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+409,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+410,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+411,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+412,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+413,Hard,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+414,Elite,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+415,Master,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+416,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+417,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+418,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+419,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+420,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+421,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+422,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+423,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+424,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+425,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+426,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+427,Grandmaster,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+428,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+429,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+430,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+431,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+432,Master,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+433,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+434,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+435,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+436,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+437,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+438,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+439,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+440,Master,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+441,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+442,Hard,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+443,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+444,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+445,Master,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+446,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+447,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+448,Master,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+449,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+450,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+451,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+452,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+453,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+454,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+455,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+456,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+457,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+458,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+459,Master,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+460,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+461,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+462,Elite,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+463,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+464,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+465,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+466,Master,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+467,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+468,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+469,Master,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+470,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+471,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+472,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+473,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+474,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+475,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+476,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+477,Grandmaster,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+478,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+479,Master,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+480,Grandmaster,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+481,Elite,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+482,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+483,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+484,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+485,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+486,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+487,Elite,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+488,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+489,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+490,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+491,Master,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+492,Grandmaster,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+493,Grandmaster,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+494,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+495,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+496,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+497,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+498,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+499,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+500,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+501,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+502,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+503,Master,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+504,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+505,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+506,Grandmaster,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+507,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+508,Elite,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+509,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+510,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+511,Elite,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+512,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+513,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+514,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+515,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+516,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+517,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+518,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+519,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+520,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+521,Grandmaster,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+522,Hard,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+523,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+524,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+525,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+526,Hard,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+527,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+528,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+529,Grandmaster,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+530,Elite,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+531,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+532,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+533,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+534,Hard,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+535,Master,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+536,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+537,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+538,Hard,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+539,Master,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+540,Elite,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+541,Elite,Araxxor,Araxxor Challenge Task,Complete a designated milestone or special combat condition against Araxxor.
+542,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+543,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+544,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+545,Master,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+546,Hard,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+547,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+548,Elite,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+549,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+550,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+551,Master,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+552,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+553,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+554,Grandmaster,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+555,Hard,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+556,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+557,Master,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+558,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+559,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+560,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+561,Elite,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+562,Hard,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+563,Grandmaster,Vardorvis,Vardorvis Challenge Task,Complete a designated milestone or special combat condition against Vardorvis.
+564,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+565,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+566,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+567,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+568,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+569,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+570,Grandmaster,K'ril Tsutsaroth,K'ril Tsutsaroth Challenge Task,Complete a designated milestone or special combat condition against K'ril Tsutsaroth.
+571,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+572,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+573,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+574,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+575,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+576,Master,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+577,Grandmaster,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+578,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+579,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+580,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+581,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+582,Master,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+583,Elite,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+584,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+585,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+586,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+587,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+588,Hard,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+589,Elite,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+590,Master,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+591,Hard,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
+592,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+593,Master,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+594,Master,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+595,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+596,Hard,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+597,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+598,Hard,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+599,Grandmaster,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+600,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+601,Hard,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+602,Elite,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+603,Hard,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+604,Master,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+605,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+606,Grandmaster,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+607,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+608,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+609,Hard,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+610,Master,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+611,Elite,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+612,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+613,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+614,Master,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+615,Grandmaster,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+616,Hard,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+617,Elite,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+618,Grandmaster,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+619,Grandmaster,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+620,Grandmaster,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+621,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+622,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+623,Master,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+624,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+625,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+626,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+627,Hard,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+628,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+629,Elite,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+630,Hard,Nex,Nex Challenge Task,Complete a designated milestone or special combat condition against Nex.
+631,Master,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+632,Grandmaster,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+633,Grandmaster,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+634,Master,Vorkath,Vorkath Challenge Task,Complete a designated milestone or special combat condition against Vorkath.
+635,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+636,Hard,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+637,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+638,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+639,Hard,Duke Succellus,Duke Succellus Challenge Task,Complete a designated milestone or special combat condition against Duke Succellus.
+640,Master,Alchemical Hydra,Alchemical Hydra Challenge Task,Complete a designated milestone or special combat condition against Alchemical Hydra.
+641,Master,Theatre of Blood,Theatre of Blood Challenge Task,Complete a designated milestone or special combat condition against Theatre of Blood.
+642,Elite,Colosseum,Colosseum Challenge Task,Complete a designated milestone or special combat condition against Colosseum.
+643,Hard,General Graardor,General Graardor Challenge Task,Complete a designated milestone or special combat condition against General Graardor.
+644,Master,Inferno,Inferno Challenge Task,Complete a designated milestone or special combat condition against Inferno.
+645,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+646,Master,The Whisperer,The Whisperer Challenge Task,Complete a designated milestone or special combat condition against The Whisperer.
+647,Master,Leviathan,Leviathan Challenge Task,Complete a designated milestone or special combat condition against Leviathan.
+648,Elite,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+649,Grandmaster,Tombs of Amascut,Tombs of Amascut Challenge Task,Complete a designated milestone or special combat condition against Tombs of Amascut.
+650,Elite,Chambers of Xeric,Chambers of Xeric Challenge Task,Complete a designated milestone or special combat condition against Chambers of Xeric.
+651,Hard,Zulrah,Zulrah Challenge Task,Complete a designated milestone or special combat condition against Zulrah.
+652,Elite,Corrupted Gauntlet,Corrupted Gauntlet Challenge Task,Complete a designated milestone or special combat condition against Corrupted Gauntlet.
+653,Grandmaster,Commander Zilyana,Commander Zilyana Challenge Task,Complete a designated milestone or special combat condition against Commander Zilyana.
+654,Master,Kree'arra,Kree'arra Challenge Task,Complete a designated milestone or special combat condition against Kree'arra.
+655,Master,Phantom Muspah,Phantom Muspah Challenge Task,Complete a designated milestone or special combat condition against Phantom Muspah.
