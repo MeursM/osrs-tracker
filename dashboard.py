@@ -380,7 +380,6 @@ with main_tab_group:
         
         st.dataframe(pivoted_skills, use_container_width=True)
 
-    with g_tab_prog
 
     # =========================================================
     # TAB: GROUP BOSSES & ACTIVITIES (TIMEFRAME GAINS ONLY)
