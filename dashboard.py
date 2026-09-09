@@ -389,17 +389,19 @@ with main_tab_group:
         # Sub-tabs for switching chart styles
         prog_sub_tab1, prog_sub_tab2, prog_sub_tab3, prog_sub_tab4 = st.tabs([
             "📈 Timeline Progression", 
-            "🍩 Skill XP Share (Donut)", 
+            "🍩 Skill XP Share (Grid)", 
             "📊 Multi-Skill Comparison (Stacked)", 
             "🕸️ Group Radar / Specializations"
         ])
 
-        # Global Timeframe Selector for Progression Tab
-        timeframe_g = st.selectbox("Timeframe Window", ["Week", "Month", "Year", "All Time"], index=3, key="group_timeframe_global")
+        # Global Timeframe Selector for Progression Tab (Includes Day filter)
+        timeframe_g = st.selectbox("Timeframe Window", ["Day", "Week", "Month", "Year", "All Time"], index=1, key="group_timeframe_global")
         
         # Calculate Timeframe Cutoff Date
         max_dt = xp_df['date'].max()
-        if timeframe_g == "Week":
+        if timeframe_g == "Day":
+            min_dt = max_dt - timedelta(days=1)
+        elif timeframe_g == "Week":
             min_dt = max_dt - timedelta(days=7)
         elif timeframe_g == "Month":
             min_dt = max_dt - timedelta(days=30)
@@ -501,6 +503,144 @@ with main_tab_group:
             else:
                 st.info(f"No records available for {selected_cat} in the selected timeframe.")
 
+        # ---------------------------------------------------------
+        # SUB-TAB 2: DONUT GRID (SEPARATE PIE CHART PER SKILL)
+        # ---------------------------------------------------------
+        with prog_sub_tab2:
+            st.write("**All Skills XP Breakdown Grid**")
+            st.caption(f"Showing XP share per skill sorted by total group XP gained ({timeframe_g})")
+
+            donut_grid_df = xp_df[(xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt) & (xp_df['skill'] != 'Overall')].copy()
+
+            if not donut_grid_df.empty:
+                # Calculate start and end XP per skill per player
+                start_xp = donut_grid_df.sort_values('timestamp').groupby(['skill', 'player'])['xp'].first()
+                end_xp = donut_grid_df.sort_values('timestamp').groupby(['skill', 'player'])['xp'].last()
+                
+                gained_grid = (end_xp - start_xp).reset_index().rename(columns={'xp': 'XP_Gained'})
+                gained_grid['XP_Gained'] = gained_grid['XP_Gained'].apply(lambda x: max(0, x))
+
+                # Aggregate total group XP gained per skill to sort skills from highest to lowest total XP
+                skill_totals = gained_grid.groupby('skill')['XP_Gained'].sum().reset_index()
+                sorted_skills = skill_totals.sort_values(by='XP_Gained', ascending=False)['skill'].tolist()
+
+                # Filter out skills with zero total gains across the group if preferred, or keep all
+                active_skills = [s for s in sorted_skills if skill_totals[skill_totals['skill'] == s]['XP_Gained'].values[0] > 0]
+                
+                if not active_skills:
+                    active_skills = sorted_skills # Fallback if no gains in short window
+
+                # Render grid of donut charts (3 per row)
+                grid_cols = st.columns(3)
+                
+                for idx, skill_name in enumerate(active_skills):
+                    col_idx = idx % 3
+                    skill_data = gained_grid[gained_grid['skill'] == skill_name]
+                    total_skill_xp = skill_data['XP_Gained'].sum()
+
+                    with grid_cols[col_idx]:
+                        fig_skill_donut = px.pie(
+                            skill_data,
+                            values='XP_Gained',
+                            names='player',
+                            hole=0.5,
+                            title=f"<b>{skill_name}</b> ({total_skill_xp:,.0f} XP)"
+                        )
+                        fig_skill_donut.update_traces(
+                            textposition='inside',
+                            textinfo='percent',
+                            hovertemplate="%{label}: %{value:,.0f} XP (%{percent})",
+                            marker=dict(line=dict(color='#0d1117', width=2))
+                        )
+                        fig_skill_donut.update_layout(
+                            plot_bgcolor="#0d1117",
+                            paper_bgcolor="#161b22",
+                            font_color="#c9d1d9",
+                            showlegend=True,
+                            height=260,
+                            margin=dict(l=10, r=10, t=35, b=10),
+                            legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+                        )
+                        st.plotly_chart(fig_skill_donut, use_container_width=True)
+            else:
+                st.info("No skill data recorded in the selected timeframe.")
+
+        # ---------------------------------------------------------
+        # SUB-TAB 3: STACKED BAR CHART (MULTI-SKILL COMPARISON)
+        # ---------------------------------------------------------
+        with prog_sub_tab3:
+            st.write("**Multi-Skill XP Gained Across All Group Members**")
+            st.caption(f"Comparing XP gained per skill during the selected timeframe ({timeframe_g})")
+
+            gains_df = xp_df[(xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt) & (xp_df['skill'] != 'Overall')].copy()
+
+            if not gains_df.empty:
+                start_xp = gains_df.sort_values('timestamp').groupby(['player', 'skill'])['xp'].first()
+                end_xp = gains_df.sort_values('timestamp').groupby(['player', 'skill'])['xp'].last()
+
+                xp_gained = (end_xp - start_xp).reset_index().rename(columns={'xp': 'XP_Gained'})
+                xp_gained = xp_gained[xp_gained['XP_Gained'] > 0]
+
+                if not xp_gained.empty:
+                    fig_stacked = px.bar(
+                        xp_gained,
+                        x="XP_Gained",
+                        y="skill",
+                        color="player",
+                        orientation="h",
+                        title=f"Total XP Trained per Skill ({timeframe_g})",
+                        labels={'XP_Gained': 'XP Gained', 'skill': 'Skill'}
+                    )
+                    fig_stacked.update_layout(
+                        plot_bgcolor="#0d1117", paper_bgcolor="#0d1117", font_color="#8b949e",
+                        barmode="stack", height=550,
+                        xaxis=dict(showgrid=True, gridcolor="#21262d"),
+                        yaxis=dict(autorange="reversed")
+                    )
+                    st.plotly_chart(fig_stacked, use_container_width=True)
+                else:
+                    st.info(f"No skills were trained in the selected timeframe ({timeframe_g}).")
+            else:
+                st.info("No skill records available for this timeframe.")
+
+        # ---------------------------------------------------------
+        # SUB-TAB 4: RADAR CHART (GROUP SPECIALIZATIONS)
+        # ---------------------------------------------------------
+        with prog_sub_tab4:
+            import plotly.graph_objects as go
+
+            st.write("**Group Specialization Radar**")
+            st.caption("Visualizing skill level distribution across all members to identify team specialists.")
+
+            latest_skills_radar = xp_df[(xp_df['date'] == xp_df['date'].max()) & (xp_df['skill'] != 'Overall')].copy()
+
+            if not latest_skills_radar.empty:
+                fig_radar = go.Figure()
+
+                for player in all_players:
+                    p_data = latest_skills_radar[latest_skills_radar['player'] == player].sort_values('skill')
+                    fig_radar.add_trace(go.Scatterpolar(
+                        r=p_data['level'],
+                        theta=p_data['skill'],
+                        fill='toself',
+                        name=player
+                    ))
+
+                fig_radar.update_layout(
+                    polar=dict(
+                        radialaxis=dict(visible=True, range=[0, 99], color="#8b949e", gridcolor="#21262d"),
+                        angularaxis=dict(color="#c9d1d9", gridcolor="#21262d"),
+                        bgcolor="#0d1117"
+                    ),
+                    paper_bgcolor="#0d1117",
+                    font_color="#c9d1d9",
+                    showlegend=True,
+                    height=500,
+                    margin=dict(l=40, r=40, t=20, b=20)
+                )
+                st.plotly_chart(fig_radar, use_container_width=True)
+            else:
+                st.info("No skill level data available for the radar chart.")
         # ---------------------------------------------------------
         # SUB-TAB 2: DONUT CHART (XP SHARE PER SKILL)
         # ---------------------------------------------------------
