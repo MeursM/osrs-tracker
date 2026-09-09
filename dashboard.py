@@ -380,37 +380,24 @@ with main_tab_group:
         
         st.dataframe(pivoted_skills, use_container_width=True)
 
-    # GROUP PROGRESSION OVER TIME PER CATEGORY (BASELINED AT 0)
+   # =========================================================
+    # TAB: GROUP PROGRESSION & CHARTS (WITH MULTI-VIEW SUB-TABS)
+    # =========================================================
     with g_tab_prog:
-        st.subheader("📈 Group Relative Progression Over Time")
+        st.subheader("📈 Group Progression & Visualizations")
         
-        gc1, gc2, gc3, gc4 = st.columns([2, 2, 2, 2])
+        # Sub-tabs for switching chart styles
+        prog_sub_tab1, prog_sub_tab2, prog_sub_tab3, prog_sub_tab4 = st.tabs([
+            "📈 Timeline Progression", 
+            "🍩 Skill XP Share (Donut)", 
+            "📊 Multi-Skill Comparison (Stacked)", 
+            "🕸️ Group Radar / Specializations"
+        ])
+
+        # Global Timeframe Selector for Progression Tab
+        timeframe_g = st.selectbox("Timeframe Window", ["Week", "Month", "Year", "All Time"], index=3, key="group_timeframe_global")
         
-        with gc1:
-            data_type = st.selectbox("Category Type", ["Skills", "Bosses & Activities"], key="group_cat_type")
-        
-        with gc2:
-            if data_type == "Skills":
-                available_cats = sorted(xp_df['skill'].unique().tolist())
-                selected_cat = st.selectbox("Select Skill", available_cats, index=available_cats.index("Overall") if "Overall" in available_cats else 0, key="group_cat_select")
-            else:
-                if act_df is not None and not act_df.empty:
-                    available_cats = sorted(act_df['activity'].unique().tolist())
-                    selected_cat = st.selectbox("Select Activity/Boss", available_cats, index=0, key="group_act_select")
-                else:
-                    available_cats = []
-                    selected_cat = None
-                    st.selectbox("Select Activity/Boss", ["None Available"], disabled=True)
-
-        with gc3:
-            timeframe_g = st.selectbox("Timeframe", ["Week", "Month", "Year", "All Time"], index=3, key="group_timeframe")
-
-        with gc4:
-            view_mode = st.selectbox("Display Mode", ["Individual Overlay", "Group Aggregate Total"], key="group_view_mode")
-
-        st.write("")
-
-        # Calculate Timeframe Cutoff
+        # Calculate Timeframe Cutoff Date
         max_dt = xp_df['date'].max()
         if timeframe_g == "Week":
             min_dt = max_dt - timedelta(days=7)
@@ -421,81 +408,223 @@ with main_tab_group:
         else:
             min_dt = xp_df['date'].min()
 
-        # Render Chart based on Selection
-        if data_type == "Skills":
-            cat_df = xp_df[(xp_df['skill'] == selected_cat) & (xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt)].copy()
-            val_col = 'xp'
-            unit_label = "Experience"
-        else:
-            if act_df is not None and not act_df.empty and selected_cat:
-                cat_df = act_df[(act_df['activity'] == selected_cat) & (act_df['date'] >= min_dt) & (act_df['date'] <= max_dt)].copy()
-                val_col = 'score'
-                unit_label = "Kills / Score"
-            else:
-                cat_df = pd.DataFrame()
-
-        if not cat_df.empty:
-            cat_df = cat_df.sort_values('timestamp')
-
-            # BASELINE TO ZERO: Compute relative gains starting at 0 from the start of the selected timeframe
-            if view_mode == "Individual Overlay":
-                start_vals = cat_df.groupby('player')[val_col].transform('first')
-                cat_df['relative_val'] = cat_df[val_col] - start_vals
-                y_chart_col = 'relative_val'
-            else:
-                agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
-                agg_df['relative_val'] = agg_df[val_col] - agg_df[val_col].iloc[0]
-                y_chart_col = 'relative_val'
-
-            ch_col1, ch_col2 = st.columns([1, 1])
-
-            with ch_col1:
-                st.write(f"**Gained {selected_cat} {unit_label} (Starting at 0)**")
-                st.caption(f"Relative progression over time during the selected {timeframe_g.lower()}")
-                
-                if view_mode == "Individual Overlay":
-                    fig_group_cum = px.line(cat_df, x="date", y=y_chart_col, color="player", labels={'relative_val': f'Gained {unit_label}'})
+        # ---------------------------------------------------------
+        # SUB-TAB 1: TIMELINE PROGRESSION (ORIGINAL LINE CHARTS)
+        # ---------------------------------------------------------
+        with prog_sub_tab1:
+            gc1, gc2, gc3 = st.columns([2, 2, 2])
+            
+            with gc1:
+                data_type = st.selectbox("Category Type", ["Skills", "Bosses & Activities"], key="group_cat_type")
+            
+            with gc2:
+                if data_type == "Skills":
+                    available_cats = sorted(xp_df['skill'].unique().tolist())
+                    selected_cat = st.selectbox("Select Skill", available_cats, index=available_cats.index("Overall") if "Overall" in available_cats else 0, key="group_cat_select")
                 else:
-                    fig_group_cum = px.line(agg_df, x="date", y=y_chart_col, labels={'relative_val': f'Group Gained {unit_label}'})
-                    fig_group_cum.update_traces(line_color="#2f81f7", line_width=2.5)
+                    if act_df is not None and not act_df.empty:
+                        available_cats = sorted(act_df['activity'].unique().tolist())
+                        selected_cat = st.selectbox("Select Activity/Boss", available_cats, index=0, key="group_act_select")
+                    else:
+                        available_cats = []
+                        selected_cat = None
+                        st.selectbox("Select Activity/Boss", ["None Available"], disabled=True)
 
-                fig_group_cum.update_layout(
-                    plot_bgcolor="#0d1117",
-                    paper_bgcolor="#0d1117",
-                    font_color="#8b949e",
-                    margin=dict(l=20, r=20, t=10, b=20),
-                    height=300,
-                    xaxis=dict(showgrid=False, zeroline=False),
-                    yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
-                )
-                st.plotly_chart(fig_group_cum, use_container_width=True)
+            with gc3:
+                view_mode = st.selectbox("Display Mode", ["Individual Overlay", "Group Aggregate Total"], key="group_view_mode")
 
-            with ch_col2:
-                st.write(f"**Daily {selected_cat} Gains**")
-                st.caption(f"Daily increase in {selected_cat.lower()}")
-                
-                if view_mode == "Individual Overlay":
-                    cat_df['daily_gain'] = cat_df.groupby('player')[val_col].diff().fillna(0)
-                    cat_df['daily_gain'] = cat_df['daily_gain'].apply(lambda x: max(0, x))
-                    fig_group_bar = px.bar(cat_df, x="date", y="daily_gain", color="player", barmode="group", labels={'daily_gain': f'Daily {unit_label}'})
+            st.write("")
+
+            if data_type == "Skills":
+                cat_df = xp_df[(xp_df['skill'] == selected_cat) & (xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt)].copy()
+                val_col = 'xp'
+                unit_label = "Experience"
+            else:
+                if act_df is not None and not act_df.empty and selected_cat:
+                    cat_df = act_df[(act_df['activity'] == selected_cat) & (act_df['date'] >= min_dt) & (act_df['date'] <= max_dt)].copy()
+                    val_col = 'score'
+                    unit_label = "Kills / Score"
                 else:
-                    agg_df['daily_gain'] = agg_df[val_col].diff().fillna(0)
-                    agg_df['daily_gain'] = agg_df['daily_gain'].apply(lambda x: max(0, x))
-                    fig_group_bar = px.bar(agg_df, x="date", y="daily_gain", labels={'daily_gain': f'Daily Group {unit_label}'})
-                    fig_group_bar.update_traces(marker_color="#238636")
+                    cat_df = pd.DataFrame()
 
-                fig_group_bar.update_layout(
-                    plot_bgcolor="#0d1117",
+            if not cat_df.empty:
+                cat_df = cat_df.sort_values('timestamp')
+
+                if view_mode == "Individual Overlay":
+                    start_vals = cat_df.groupby('player')[val_col].transform('first')
+                    cat_df['relative_val'] = cat_df[val_col] - start_vals
+                    y_chart_col = 'relative_val'
+                else:
+                    agg_df = cat_df.groupby('date')[val_col].sum().reset_index()
+                    agg_df['relative_val'] = agg_df[val_col] - agg_df[val_col].iloc[0]
+                    y_chart_col = 'relative_val'
+
+                ch_col1, ch_col2 = st.columns([1, 1])
+
+                with ch_col1:
+                    st.write(f"**Gained {selected_cat} {unit_label} (Starting at 0)**")
+                    st.caption(f"Relative progression over time during the selected {timeframe_g.lower()}")
+                    
+                    if view_mode == "Individual Overlay":
+                        fig_group_cum = px.line(cat_df, x="date", y=y_chart_col, color="player", labels={'relative_val': f'Gained {unit_label}'})
+                    else:
+                        fig_group_cum = px.line(agg_df, x="date", y=y_chart_col, labels={'relative_val': f'Group Gained {unit_label}'})
+                        fig_group_cum.update_traces(line_color="#2f81f7", line_width=2.5)
+
+                    fig_group_cum.update_layout(
+                        plot_bgcolor="#0d1117", paper_bgcolor="#0d1117", font_color="#8b949e",
+                        margin=dict(l=20, r=20, t=10, b=20), height=300,
+                        xaxis=dict(showgrid=False, zeroline=False), yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                    )
+                    st.plotly_chart(fig_group_cum, use_container_width=True)
+
+                with ch_col2:
+                    st.write(f"**Daily {selected_cat} Gains**")
+                    st.caption(f"Daily increase in {selected_cat.lower()}")
+                    
+                    if view_mode == "Individual Overlay":
+                        cat_df['daily_gain'] = cat_df.groupby('player')[val_col].diff().fillna(0)
+                        cat_df['daily_gain'] = cat_df['daily_gain'].apply(lambda x: max(0, x))
+                        fig_group_bar = px.bar(cat_df, x="date", y="daily_gain", color="player", barmode="group", labels={'daily_gain': f'Daily {unit_label}'})
+                    else:
+                        agg_df['daily_gain'] = agg_df[val_col].diff().fillna(0)
+                        agg_df['daily_gain'] = agg_df['daily_gain'].apply(lambda x: max(0, x))
+                        fig_group_bar = px.bar(agg_df, x="date", y="daily_gain", labels={'daily_gain': f'Daily Group {unit_label}'})
+                        fig_group_bar.update_traces(marker_color="#238636")
+
+                    fig_group_bar.update_layout(
+                        plot_bgcolor="#0d1117", paper_bgcolor="#0d1117", font_color="#8b949e",
+                        margin=dict(l=20, r=20, t=10, b=20), height=300,
+                        xaxis=dict(showgrid=False, zeroline=False), yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                    )
+                    st.plotly_chart(fig_group_bar, use_container_width=True)
+            else:
+                st.info(f"No records available for {selected_cat} in the selected timeframe.")
+
+        # ---------------------------------------------------------
+        # SUB-TAB 2: DONUT CHART (XP SHARE PER SKILL)
+        # ---------------------------------------------------------
+        with prog_sub_tab2:
+            st.write("**XP Contribution Share per Skill**")
+            all_skills_list = sorted([s for s in xp_df['skill'].unique() if s != 'Overall'])
+            selected_donut_skill = st.selectbox("Select Skill to Inspect Share", all_skills_list, index=0, key="donut_skill_select")
+
+            donut_df = xp_df[(xp_df['skill'] == selected_donut_skill) & (xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt)].copy()
+
+            if not donut_df.empty:
+                # Calculate XP gained during period
+                start_xp = donut_df.sort_values('timestamp').groupby('player')['xp'].first()
+                end_xp = donut_df.sort_values('timestamp').groupby('player')['xp'].last()
+                gained_donut = (end_xp - start_xp).reset_index().rename(columns={'xp': 'XP_Gained'})
+                gained_donut['XP_Gained'] = gained_donut['XP_Gained'].apply(lambda x: max(0, x))
+
+                col_d1, col_d2 = st.columns([1, 1])
+
+                with col_d1:
+                    fig_pie = px.pie(
+                        gained_donut,
+                        values='XP_Gained',
+                        names='player',
+                        hole=0.45,
+                        title=f"{selected_donut_skill} XP Share Gained ({timeframe_g})"
+                    )
+                    fig_pie.update_traces(textposition='inside', textinfo='percent+label', marker=dict(line=dict(color='#0d1117', width=2)))
+                    fig_pie.update_layout(
+                        plot_bgcolor="#0d1117", paper_bgcolor="#0d1117", font_color="#c9d1d9",
+                        showlegend=True, height=360, margin=dict(l=20, r=20, t=40, b=20)
+                    )
+                    st.plotly_chart(fig_pie, use_container_width=True)
+
+                with col_d2:
+                    st.write("**XP Breakdown**")
+                    st.dataframe(
+                        gained_donut.sort_values(by='XP_Gained', ascending=False),
+                        column_config={
+                            "player": st.column_config.TextColumn("Player"),
+                            "XP_Gained": st.column_config.NumberColumn("XP Gained", format="%d")
+                        },
+                        hide_index=True,
+                        use_container_width=True
+                    )
+            else:
+                st.info("No data available for the selected skill and timeframe.")
+
+        # ---------------------------------------------------------
+        # SUB-TAB 3: STACKED BAR CHART (MULTI-SKILL COMPARISON)
+        # ---------------------------------------------------------
+        with prog_sub_tab3:
+            st.write("**Multi-Skill XP Gained Across All Group Members**")
+            st.caption(f"Comparing XP gained per skill during the selected timeframe ({timeframe_g})")
+
+            gains_df = xp_df[(xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt) & (xp_df['skill'] != 'Overall')].copy()
+
+            if not gains_df.empty:
+                start_xp = gains_df.sort_values('timestamp').groupby(['player', 'skill'])['xp'].first()
+                end_xp = gains_df.sort_values('timestamp').groupby(['player', 'skill'])['xp'].last()
+
+                xp_gained = (end_xp - start_xp).reset_index().rename(columns={'xp': 'XP_Gained'})
+                xp_gained = xp_gained[xp_gained['XP_Gained'] > 0]
+
+                if not xp_gained.empty:
+                    fig_stacked = px.bar(
+                        xp_gained,
+                        x="XP_Gained",
+                        y="skill",
+                        color="player",
+                        orientation="h",
+                        title=f"Total XP Trained per Skill ({timeframe_g})",
+                        labels={'XP_Gained': 'XP Gained', 'skill': 'Skill'}
+                    )
+                    fig_stacked.update_layout(
+                        plot_bgcolor="#0d1117", paper_bgcolor="#0d1117", font_color="#8b949e",
+                        barmode="stack", height=550,
+                        xaxis=dict(showgrid=True, gridcolor="#21262d"),
+                        yaxis=dict(autorange="reversed")
+                    )
+                    st.plotly_chart(fig_stacked, use_container_width=True)
+                else:
+                    st.info(f"No skills were trained in the selected timeframe ({timeframe_g}).")
+            else:
+                st.info("No skill records available for this timeframe.")
+
+        # ---------------------------------------------------------
+        # SUB-TAB 4: RADAR CHART (GROUP SPECIALIZATIONS)
+        # ---------------------------------------------------------
+        with prog_sub_tab4:
+            import plotly.graph_objects as go
+
+            st.write("**Group Specialization Radar**")
+            st.caption("Visualizing skill level distribution across all members to identify team specialists.")
+
+            latest_skills_radar = xp_df[(xp_df['date'] == xp_df['date'].max()) & (xp_df['skill'] != 'Overall')].copy()
+
+            if not latest_skills_radar.empty:
+                fig_radar = go.Figure()
+
+                for player in all_players:
+                    p_data = latest_skills_radar[latest_skills_radar['player'] == player].sort_values('skill')
+                    fig_radar.add_trace(go.Scatterpolar(
+                        r=p_data['level'],
+                        theta=p_data['skill'],
+                        fill='toself',
+                        name=player
+                    ))
+
+                fig_radar.update_layout(
+                    polar=dict(
+                        radialaxis=dict(visible=True, range=[0, 99], color="#8b949e", gridcolor="#21262d"),
+                        angularaxis=dict(color="#c9d1d9", gridcolor="#21262d"),
+                        bgcolor="#0d1117"
+                    ),
                     paper_bgcolor="#0d1117",
-                    font_color="#8b949e",
-                    margin=dict(l=20, r=20, t=10, b=20),
-                    height=300,
-                    xaxis=dict(showgrid=False, zeroline=False),
-                    yaxis=dict(showgrid=True, gridcolor="#21262d", zeroline=False)
+                    font_color="#c9d1d9",
+                    showlegend=True,
+                    height=500,
+                    margin=dict(l=40, r=40, t=20, b=20)
                 )
-                st.plotly_chart(fig_group_bar, use_container_width=True)
-        else:
-            st.info(f"No records available for {selected_cat} in the selected timeframe.")
+                st.plotly_chart(fig_radar, use_container_width=True)
+            else:
+                st.info("No skill level data available for the radar chart.")
 
     # =========================================================
     # TAB: GROUP BOSSES & ACTIVITIES (TIMEFRAME GAINS ONLY)
