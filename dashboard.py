@@ -381,11 +381,15 @@ with main_tab_group:
         st.dataframe(pivoted_skills, use_container_width=True)
 
    # =========================================================
-    # TAB: GROUP PROGRESSION & CHARTS (WITH MULTI-VIEW SUB-TABS)
+    # TAB: GROUP PROGRESSION & CHARTS (CONSISTENT COLORS)
     # =========================================================
     with g_tab_prog:
         st.subheader("📈 Group Progression & Visualizations")
         
+        # --- DEFINE FIXED COLOR PALETTE FOR PLAYERS ---
+        HEX_COLORS = ["#58a6ff", "#3fb950", "#d29922", "#f778ba", "#a371f7", "#79c0ff", "#ffa657"]
+        PLAYER_COLORS = {player: HEX_COLORS[i % len(HEX_COLORS)] for i, player in enumerate(all_players)}
+
         # Sub-tabs for switching chart styles
         prog_sub_tab1, prog_sub_tab2, prog_sub_tab3, prog_sub_tab4 = st.tabs([
             "📈 Timeline Progression", 
@@ -394,7 +398,7 @@ with main_tab_group:
             "🕸️ Group Radar / Specializations"
         ])
 
-        # Global Timeframe Selector for Progression Tab (Includes Day filter)
+        # Global Timeframe Selector
         timeframe_g = st.selectbox("Timeframe Window", ["Day", "Week", "Month", "Year", "All Time"], index=1, key="group_timeframe_global")
         
         # Calculate Timeframe Cutoff Date
@@ -468,7 +472,14 @@ with main_tab_group:
                     st.caption(f"Relative progression over time during the selected {timeframe_g.lower()}")
                     
                     if view_mode == "Individual Overlay":
-                        fig_group_cum = px.line(cat_df, x="date", y=y_chart_col, color="player", labels={'relative_val': f'Gained {unit_label}'})
+                        fig_group_cum = px.line(
+                            cat_df, 
+                            x="date", 
+                            y=y_chart_col, 
+                            color="player", 
+                            color_discrete_map=PLAYER_COLORS,
+                            labels={'relative_val': f'Gained {unit_label}'}
+                        )
                     else:
                         fig_group_cum = px.line(agg_df, x="date", y=y_chart_col, labels={'relative_val': f'Group Gained {unit_label}'})
                         fig_group_cum.update_traces(line_color="#2f81f7", line_width=2.5)
@@ -487,7 +498,15 @@ with main_tab_group:
                     if view_mode == "Individual Overlay":
                         cat_df['daily_gain'] = cat_df.groupby('player')[val_col].diff().fillna(0)
                         cat_df['daily_gain'] = cat_df['daily_gain'].apply(lambda x: max(0, x))
-                        fig_group_bar = px.bar(cat_df, x="date", y="daily_gain", color="player", barmode="group", labels={'daily_gain': f'Daily {unit_label}'})
+                        fig_group_bar = px.bar(
+                            cat_df, 
+                            x="date", 
+                            y="daily_gain", 
+                            color="player", 
+                            color_discrete_map=PLAYER_COLORS,
+                            barmode="group", 
+                            labels={'daily_gain': f'Daily {unit_label}'}
+                        )
                     else:
                         agg_df['daily_gain'] = agg_df[val_col].diff().fillna(0)
                         agg_df['daily_gain'] = agg_df['daily_gain'].apply(lambda x: max(0, x))
@@ -504,7 +523,7 @@ with main_tab_group:
                 st.info(f"No records available for {selected_cat} in the selected timeframe.")
 
         # ---------------------------------------------------------
-        # SUB-TAB 2: DONUT GRID (SEPARATE PIE CHART PER SKILL)
+        # SUB-TAB 2: DONUT GRID (CONSISTENT PLAYER COLORS)
         # ---------------------------------------------------------
         with prog_sub_tab2:
             st.write("**All Skills XP Breakdown Grid**")
@@ -513,24 +532,19 @@ with main_tab_group:
             donut_grid_df = xp_df[(xp_df['date'] >= min_dt) & (xp_df['date'] <= max_dt) & (xp_df['skill'] != 'Overall')].copy()
 
             if not donut_grid_df.empty:
-                # Calculate start and end XP per skill per player
                 start_xp = donut_grid_df.sort_values('timestamp').groupby(['skill', 'player'])['xp'].first()
                 end_xp = donut_grid_df.sort_values('timestamp').groupby(['skill', 'player'])['xp'].last()
                 
                 gained_grid = (end_xp - start_xp).reset_index().rename(columns={'xp': 'XP_Gained'})
                 gained_grid['XP_Gained'] = gained_grid['XP_Gained'].apply(lambda x: max(0, x))
 
-                # Aggregate total group XP gained per skill to sort skills from highest to lowest total XP
                 skill_totals = gained_grid.groupby('skill')['XP_Gained'].sum().reset_index()
                 sorted_skills = skill_totals.sort_values(by='XP_Gained', ascending=False)['skill'].tolist()
 
-                # Filter out skills with zero total gains across the group if preferred, or keep all
                 active_skills = [s for s in sorted_skills if skill_totals[skill_totals['skill'] == s]['XP_Gained'].values[0] > 0]
-                
                 if not active_skills:
-                    active_skills = sorted_skills # Fallback if no gains in short window
+                    active_skills = sorted_skills
 
-                # Render grid of donut charts (3 per row)
                 grid_cols = st.columns(3)
                 
                 for idx, skill_name in enumerate(active_skills):
@@ -543,6 +557,8 @@ with main_tab_group:
                             skill_data,
                             values='XP_Gained',
                             names='player',
+                            color='player',
+                            color_discrete_map=PLAYER_COLORS,
                             hole=0.5,
                             title=f"<b>{skill_name}</b> ({total_skill_xp:,.0f} XP)"
                         )
@@ -566,7 +582,7 @@ with main_tab_group:
                 st.info("No skill data recorded in the selected timeframe.")
 
         # ---------------------------------------------------------
-        # SUB-TAB 3: STACKED BAR CHART (MULTI-SKILL COMPARISON)
+        # SUB-TAB 3: STACKED BAR CHART (CONSISTENT PLAYER COLORS)
         # ---------------------------------------------------------
         with prog_sub_tab3:
             st.write("**Multi-Skill XP Gained Across All Group Members**")
@@ -587,6 +603,7 @@ with main_tab_group:
                         x="XP_Gained",
                         y="skill",
                         color="player",
+                        color_discrete_map=PLAYER_COLORS,
                         orientation="h",
                         title=f"Total XP Trained per Skill ({timeframe_g})",
                         labels={'XP_Gained': 'XP Gained', 'skill': 'Skill'}
@@ -604,7 +621,7 @@ with main_tab_group:
                 st.info("No skill records available for this timeframe.")
 
         # ---------------------------------------------------------
-        # SUB-TAB 4: RADAR CHART (GROUP SPECIALIZATIONS)
+        # SUB-TAB 4: RADAR CHART (CONSISTENT PLAYER COLORS)
         # ---------------------------------------------------------
         with prog_sub_tab4:
             import plotly.graph_objects as go
@@ -619,11 +636,14 @@ with main_tab_group:
 
                 for player in all_players:
                     p_data = latest_skills_radar[latest_skills_radar['player'] == player].sort_values('skill')
+                    p_color = PLAYER_COLORS.get(player, "#58a6ff")
+                    
                     fig_radar.add_trace(go.Scatterpolar(
                         r=p_data['level'],
                         theta=p_data['skill'],
                         fill='toself',
-                        name=player
+                        name=player,
+                        line=dict(color=p_color)
                     ))
 
                 fig_radar.update_layout(
@@ -641,7 +661,6 @@ with main_tab_group:
                 st.plotly_chart(fig_radar, use_container_width=True)
             else:
                 st.info("No skill level data available for the radar chart.")
-
 
     # =========================================================
     # TAB: GROUP BOSSES & ACTIVITIES (TIMEFRAME GAINS ONLY)
